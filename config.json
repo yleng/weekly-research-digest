@@ -1,0 +1,54 @@
+{
+  "researcher": "Yan Leng",
+  "affiliation": "UT Austin McCombs School of Business",
+  "research_themes": [
+    "network science and collective behavior",
+    "LLM interpretability and mechanistic interpretability",
+    "human-AI decision making",
+    "causal inference with observational and experimental data",
+    "computational social science",
+    "cooperation and game theory on networks",
+    "AI governance and polycentric governance",
+    "LLM measurement and econometrics of text data",
+    "preference alignment and activation steering",
+    "algorithmic fairness in networks"
+  ],
+  "active_projects": {
+    "Cooperation_PNAS": "Temporary prosocial intervention creates long-lived cooperation on networks. Game theory, evolutionary dynamics.",
+    "Adaptive_Monoculture": "Fixed-objective AI steering depletes adaptive reserve. Welfare reversal, cultural homogenization.",
+    "Curation_Divergence": "Competing AI intermediaries fragment shared beliefs through phase transition in curation divergence.",
+    "Structural_Targeting": "Allocation-level structural targeting equalizes bridging capital in AI-mediated networks.",
+    "AI_Governance_PNAS": "How AI changes the optimal scale of governance for public goods. Rate-distortion theory.",
+    "Provenance_Preference": "Mechanistic interpretability: provenance of economic preference-like behavior in LLMs. Causal tracing across training stages.",
+    "Constrained_Causal_Abstraction": "Network science + mechanistic interpretability. Causal discovery under structural constraints.",
+    "Inf_Steering": "Influence-aligned steering: minimum-norm activation edits matching logit changes. ICML target.",
+    "Net_DPO": "Personalization-consistency tradeoff in connected knowledge-work assistants. Management Science target.",
+    "LLMMeasurements": "Causal inference with AI-measured text outcomes. Audited LLM measurement, doubly-robust AIPW.",
+    "LLM_Prompt_Variations": "Econometric study of prompt sensitivity in LLMs. Treatment effects on model behavior.",
+    "Visible_Context_Thresholds": "Phase transitions in emergent behavior of tool-using LLM agents. Nature Machine Intelligence.",
+    "Visual_Evidence_Response": "Visual evidence response curves for multimodal LLM grounding. Nature Machine Intelligence.",
+    "Preference_Geometry": "Economic preference theory, risk/social preferences in LLMs.",
+    "Hypergraph_Interpretability": "Hypergraph methods for mechanistic interpretability.",
+    "GPT_Pricing_Bias": "LLM pricing bias in market settings."
+  },
+  "venues": {
+    "general_science": ["PNAS", "Nature", "Science", "Nature Communications", "Science Advances"],
+    "behavior_and_AI": ["Nature Human Behaviour", "Nature Machine Intelligence"],
+    "management_IS": ["Management Science", "Marketing Science", "Information Systems Research", "MIS Quarterly", "Journal of Marketing Research", "MSOM"],
+    "ml_conferences": ["ICML", "ICLR", "NeurIPS"],
+    "preprints": ["arXiv cs.MA", "arXiv cs.CL", "arXiv cs.AI", "arXiv cs.SI", "arXiv econ.EM"]
+  },
+  "github_topics": [
+    "Claude Code", "Codex", "LLM agents", "AI productivity",
+    "mechanistic interpretability", "sparse autoencoders",
+    "multi-agent systems", "MCP tools"
+  ],
+  "arxiv_categories": ["cs.MA", "cs.CL", "cs.AI", "cs.SI", "cs.LG", "econ.EM", "stat.ML"],
+  "semantic_scholar_fields": [
+    "network science", "collective behavior", "LLM interpretability",
+    "causal inference text", "AI governance", "cooperation game theory",
+    "activation steering", "sparse autoencoder", "prompt sensitivity"
+  ],
+  "output_dir": "digests",
+  "local_copy_dir": "/Users/yl36578-adm/MIT Dropbox/Yan Leng/Productivity/new_paper_monitor"
+}
