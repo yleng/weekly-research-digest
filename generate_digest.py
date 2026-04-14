@@ -26,7 +26,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +95,7 @@ def search_arxiv(query: str, categories: list[str], max_results: int = 30,
     if root is None:
         return []
 
-    cutoff = datetime.utcnow() - timedelta(days=days_back + 3)  # buffer
+    cutoff = datetime.now(UTC) - timedelta(days=days_back + 3)  # buffer
     papers = []
     for entry in root.findall("atom:entry", ARXIV_NS):
         published = entry.findtext("atom:published", "", ARXIV_NS)
@@ -103,7 +103,7 @@ def search_arxiv(query: str, categories: list[str], max_results: int = 30,
             pub_date = datetime.fromisoformat(published.replace("Z", "+00:00"))
         except (ValueError, AttributeError):
             continue
-        if pub_date.replace(tzinfo=None) < cutoff:
+        if pub_date < cutoff:
             continue
 
         arxiv_id = entry.findtext("atom:id", "", ARXIV_NS).split("/abs/")[-1]
@@ -172,7 +172,7 @@ def search_semantic_scholar(query: str, max_results: int = 10,
 def search_github_repos(topics: list[str], days_back: int = 7,
                         max_results: int = 20) -> list[dict]:
     """Search GitHub for recently created/updated repos."""
-    since = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+    since = (datetime.now(UTC) - timedelta(days=days_back)).strftime("%Y-%m-%d")
     all_repos: dict[str, dict] = {}
 
     headers = {"Accept": "application/vnd.github.v3+json"}
@@ -211,22 +211,22 @@ def search_github_repos(topics: list[str], days_back: int = 7,
 # ---------------------------------------------------------------------------
 
 THEME_KEYWORDS: dict[str, list[str]] = {
-    "Cooperation_PNAS": ["cooperation", "prosocial", "game theory", "evolutionary dynamics", "public goods", "intervention"],
-    "Adaptive_Monoculture": ["monoculture", "homogenization", "cultural", "adaptive reserve", "diversity loss", "AI steering"],
-    "Curation_Divergence": ["curation", "filter bubble", "belief fragmentation", "intermediary", "misinformation", "polarization"],
-    "Structural_Targeting": ["bridging capital", "structural", "targeting", "algorithmic fairness", "network inequality"],
-    "AI_Governance_PNAS": ["governance", "polycentric", "public goods", "AI policy", "institutional design", "rate-distortion"],
-    "Provenance_Preference": ["mechanistic interpretability", "preference", "causal tracing", "economic behavior", "training dynamics", "probing"],
-    "Constrained_Causal_Abstraction": ["causal abstraction", "causal discovery", "structural constraints", "circuit", "interchange intervention"],
-    "Inf_Steering": ["activation steering", "activation editing", "sparse autoencoder", "logit", "influence", "minimum-norm"],
-    "Net_DPO": ["personalization", "consistency", "DPO", "preference optimization", "network", "knowledge work"],
-    "LLMMeasurements": ["LLM measurement", "text as data", "econometric", "AIPW", "calibration", "doubly robust", "audited"],
-    "LLM_Prompt_Variations": ["prompt sensitivity", "prompt robustness", "prompt variation", "treatment effect", "specification"],
-    "Visible_Context_Thresholds": ["tool use", "context window", "phase transition", "emergent", "cognitive bottleneck"],
-    "Visual_Evidence_Response": ["multimodal", "grounding", "visual", "vision-language", "evidence curve"],
-    "Preference_Geometry": ["risk preference", "social preference", "preference geometry", "behavioral economics"],
-    "Hypergraph_Interpretability": ["hypergraph", "higher-order", "interpretability"],
-    "GPT_Pricing_Bias": ["pricing bias", "market", "discrimination", "LLM bias"],
+    "Cooperation_PNAS": ["cooperation", "prosocial", "game theory", "evolutionary dynamics", "public goods", "intervention", "social dilemma", "cooperation network", "collective action"],
+    "Adaptive_Monoculture": ["monoculture", "homogenization", "cultural", "adaptive reserve", "diversity loss", "AI steering", "echo chamber", "opinion dynamics", "consensus"],
+    "Curation_Divergence": ["curation", "filter bubble", "belief fragmentation", "intermediary", "misinformation", "polarization", "recommendation", "information diet"],
+    "Structural_Targeting": ["bridging capital", "structural", "targeting", "algorithmic fairness", "network inequality", "social capital", "bridge", "brokerage"],
+    "AI_Governance_PNAS": ["governance", "polycentric", "public goods", "AI policy", "institutional design", "rate-distortion", "regulation", "AI safety"],
+    "Provenance_Preference": ["mechanistic interpretability", "preference", "causal tracing", "economic behavior", "training dynamics", "probing", "circuit", "feature attribution"],
+    "Constrained_Causal_Abstraction": ["causal abstraction", "causal discovery", "structural constraints", "circuit", "interchange intervention", "abstraction"],
+    "Inf_Steering": ["activation steering", "activation editing", "sparse autoencoder", "logit", "influence", "minimum-norm", "representation engineering", "steering vector"],
+    "Net_DPO": ["personalization", "consistency", "DPO", "preference optimization", "network", "knowledge work", "alignment", "RLHF"],
+    "LLMMeasurements": ["LLM measurement", "text as data", "econometric", "AIPW", "calibration", "doubly robust", "audited", "annotation", "text classification"],
+    "LLM_Prompt_Variations": ["prompt sensitivity", "prompt robustness", "prompt variation", "treatment effect", "specification", "prompt engineering", "in-context learning"],
+    "Visible_Context_Thresholds": ["tool use", "context window", "phase transition", "emergent", "cognitive bottleneck", "agent", "tool-use", "planning"],
+    "Visual_Evidence_Response": ["multimodal", "grounding", "visual", "vision-language", "evidence curve", "hallucination", "VLM"],
+    "Preference_Geometry": ["risk preference", "social preference", "preference geometry", "behavioral economics", "decision making", "utility"],
+    "Hypergraph_Interpretability": ["hypergraph", "higher-order", "interpretability", "graph neural"],
+    "GPT_Pricing_Bias": ["pricing bias", "market", "discrimination", "LLM bias", "fairness", "audit"],
 }
 
 
@@ -236,7 +236,7 @@ def score_paper(paper: dict) -> list[tuple[str, float]]:
     matches = []
     for project, keywords in THEME_KEYWORDS.items():
         score = sum(1.0 for kw in keywords if kw.lower() in text)
-        if score >= 1.5:
+        if score >= 1.0:  # lowered threshold to catch more relevant papers
             matches.append((project, score))
     matches.sort(key=lambda x: x[1], reverse=True)
     return matches[:3]
@@ -383,7 +383,7 @@ def generate_digest(papers: list[dict], repos: list[dict],
 
 def main():
     parser = argparse.ArgumentParser(description="Generate weekly research digest")
-    parser.add_argument("--date", default=datetime.utcnow().strftime("%Y-%m-%d"),
+    parser.add_argument("--date", default=datetime.now(UTC).strftime("%Y-%m-%d"),
                         help="Digest date (YYYY-MM-DD)")
     parser.add_argument("--days", type=int, default=7,
                         help="Look-back window in days")
@@ -415,14 +415,14 @@ def main():
         time.sleep(1)  # be nice to arXiv API
 
     # --- Semantic Scholar searches ---
-    current_year = datetime.utcnow().year
+    current_year = datetime.now(UTC).year
     year_range = f"{current_year - 1}-{current_year}"
     ss_queries = CFG["semantic_scholar_fields"]
     for q in ss_queries:
         print(f"  Semantic Scholar: {q}...")
         results = search_semantic_scholar(q, max_results=8, year_range=year_range)
         all_papers.extend(results)
-        time.sleep(1)  # rate limit
+        time.sleep(3)  # Semantic Scholar rate limit: ~1 req/sec for unauthenticated
 
     print(f"  Total papers fetched: {len(all_papers)}")
 
