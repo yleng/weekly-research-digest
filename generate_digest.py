@@ -497,6 +497,113 @@ def generate_digest(papers: list[dict], repos: list[dict],
     return "\n".join(lines)
 
 # ---------------------------------------------------------------------------
+# Audio generation
+# ---------------------------------------------------------------------------
+
+def digest_to_speech_text(scored: list[dict], repos: list[dict],
+                          digest_date: str, days_back: int) -> str:
+    """Convert digest data into a natural spoken script for TTS."""
+    week_start = (datetime.strptime(digest_date, "%Y-%m-%d") - timedelta(days=days_back)).strftime("%B %d")
+    week_end = datetime.strptime(digest_date, "%Y-%m-%d").strftime("%B %d, %Y")
+
+    parts = []
+    parts.append(f"Weekly Research Digest, {week_start} to {week_end}.")
+    parts.append("")
+
+    # Top papers overview
+    top = scored[:8]
+    parts.append(f"This week I found {len(scored)} relevant papers. Here are the top {len(top)}.")
+    parts.append("")
+
+    for i, p in enumerate(top, 1):
+        title = p["title"]
+        venue = p.get("venue", "") or p.get("source", "")
+        overall = p.get("rating_overall", 0)
+        matches = p.get("project_matches", [])
+        proj = matches[0][0].replace("_", " ") if matches else "your research"
+        summary = p.get("summary", "")
+        # Take first 2 sentences of summary
+        sentences = re.split(r'(?<=[.!?])\s+', summary)
+        short_summary = " ".join(sentences[:2]) if sentences else ""
+
+        parts.append(f"Number {i}. {title}.")
+        if venue:
+            parts.append(f"Published in {venue}. Overall rating: {overall} out of 5.")
+        if short_summary:
+            parts.append(short_summary)
+        parts.append(f"This connects to your {proj} project.")
+        parts.append("")
+
+    # Remaining papers — brief mentions
+    remaining = scored[8:]
+    if remaining:
+        parts.append(f"And {len(remaining)} more relevant papers this week. Here are quick mentions.")
+        parts.append("")
+        for p in remaining[:12]:  # cap spoken mentions at 20 total
+            title = p["title"]
+            matches = p.get("project_matches", [])
+            proj = matches[0][0].replace("_", " ") if matches else "your research"
+            overall = p.get("rating_overall", 0)
+            parts.append(f"{title}. Rating {overall} out of 5. Relevant to {proj}.")
+        if len(remaining) > 12:
+            parts.append(f"Plus {len(remaining) - 12} more papers in the written digest.")
+        parts.append("")
+
+    # GitHub repos
+    if repos:
+        parts.append(f"On GitHub, {len(repos)} trending repos in your areas this week.")
+        for r in repos[:5]:
+            name = r["name"].split("/")[-1]
+            desc = r["description"][:100] if r["description"] else ""
+            parts.append(f"{name}, with {r['stars']:,} stars. {desc}.")
+        parts.append("")
+
+    # Synthesis
+    project_counts: dict[str, int] = {}
+    for p in scored:
+        for m in p.get("project_matches", []):
+            project_counts[m[0]] = project_counts.get(m[0], 0) + 1
+    hot = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[:3]
+    if hot:
+        hot_str = ", ".join(f"{p.replace('_', ' ')} with {c} papers" for p, c in hot)
+        parts.append(f"This week's research clusters around: {hot_str}.")
+
+    parts.append("That's your weekly digest. Check the written version for full details and links.")
+
+    return "\n".join(parts)
+
+
+async def generate_audio(text: str, output_path: str,
+                         voice: str = "en-US-AriaNeural") -> str:
+    """Generate MP3 audio from text using edge-tts."""
+    import edge_tts
+    communicate = edge_tts.Communicate(text, voice, rate="+10%")
+    await communicate.save(output_path)
+    return output_path
+
+
+def make_audio(scored: list[dict], repos: list[dict],
+               digest_date: str, days_back: int, output_dir: Path) -> str | None:
+    """Generate audio digest. Returns path to MP3 or None on failure."""
+    try:
+        import asyncio
+        speech = digest_to_speech_text(scored, repos, digest_date, days_back)
+
+        # Save speech script for reference
+        script_path = output_dir / f"digest-{digest_date}-script.txt"
+        script_path.write_text(speech)
+
+        audio_path = str(output_dir / f"digest-{digest_date}.mp3")
+        asyncio.run(generate_audio(speech, audio_path))
+        return audio_path
+    except ImportError:
+        print("  [WARN] edge-tts not installed, skipping audio (pip install edge-tts)")
+        return None
+    except Exception as e:
+        print(f"  [WARN] Audio generation failed: {e}")
+        return None
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -510,6 +617,10 @@ def main():
                         help="Skip GitHub search")
     parser.add_argument("--no-copy", action="store_true",
                         help="Skip copying to local directory")
+    parser.add_argument("--audio", action="store_true", default=True,
+                        help="Generate MP3 audio version (default: on)")
+    parser.add_argument("--no-audio", action="store_true",
+                        help="Skip audio generation")
     args = parser.parse_args()
 
     print(f"Generating digest for {args.date} (looking back {args.days} days)...")
@@ -552,6 +663,25 @@ def main():
         repos = search_github_repos(CFG["github_topics"], days_back=args.days)
         print(f"  Found {len(repos)} repos")
 
+    # --- Score papers for shared use by digest + audio ---
+    scored = []
+    for p in all_papers:
+        matches = score_paper(p)
+        if matches:
+            p["project_matches"] = matches
+            p["top_score"] = matches[0][1]
+            rate_paper(p)
+            scored.append(p)
+    # Deduplicate
+    seen_titles: set[str] = set()
+    unique_scored = []
+    for p in scored:
+        title_key = re.sub(r"[^a-z0-9]", "", p["title"].lower())[:60]
+        if title_key not in seen_titles:
+            seen_titles.add(title_key)
+            unique_scored.append(p)
+    unique_scored.sort(key=lambda x: x["rating_overall"], reverse=True)
+
     # --- Generate digest ---
     digest = generate_digest(all_papers, repos, args.date, args.days)
 
@@ -561,6 +691,21 @@ def main():
     output_file = output_dir / f"digest-{args.date}.md"
     output_file.write_text(digest)
     print(f"  Written to {output_file}")
+
+    # --- Generate audio ---
+    if args.audio and not args.no_audio:
+        print("  Generating audio...")
+        audio_path = make_audio(unique_scored, repos, args.date, args.days, output_dir)
+        if audio_path:
+            print(f"  Audio: {audio_path}")
+            # Copy audio to local dir too
+            if not args.no_copy:
+                local_dir = Path(CFG["local_copy_dir"])
+                if local_dir.exists():
+                    shutil.copy2(audio_path, local_dir / f"digest-{args.date}.mp3")
+                    script_src = output_dir / f"digest-{args.date}-script.txt"
+                    if script_src.exists():
+                        shutil.copy2(script_src, local_dir / f"digest-{args.date}-script.txt")
 
     # --- Copy to local dir if available ---
     if not args.no_copy:
