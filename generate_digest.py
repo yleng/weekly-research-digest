@@ -236,10 +236,103 @@ def score_paper(paper: dict) -> list[tuple[str, float]]:
     matches = []
     for project, keywords in THEME_KEYWORDS.items():
         score = sum(1.0 for kw in keywords if kw.lower() in text)
-        if score >= 1.0:  # lowered threshold to catch more relevant papers
+        if score >= 1.0:
             matches.append((project, score))
     matches.sort(key=lambda x: x[1], reverse=True)
     return matches[:3]
+
+
+# Venue quality tiers (impact factor / prestige proxy)
+VENUE_TIER: dict[str, int] = {
+    # Tier 1: top general science (5 stars)
+    "nature": 5, "science": 5, "pnas": 5,
+    # Tier 2: top field journals (4 stars)
+    "nature communications": 4, "science advances": 4,
+    "nature human behaviour": 4, "nature machine intelligence": 4,
+    "management science": 4, "information systems research": 4,
+    "marketing science": 4, "mis quarterly": 4,
+    "journal of marketing research": 4, "msom": 4,
+    # Tier 3: top ML conferences (4 stars)
+    "neurips": 4, "icml": 4, "iclr": 4, "nips": 4,
+    "aaai": 3, "acl": 3, "emnlp": 3,
+    # Tier 2-3: good journals
+    "nature reviews": 4, "scientific reports": 3,
+    "plos one": 3, "behavior research methods": 3,
+    # Preprints
+    "arxiv": 2, "arxiv.org": 2,
+}
+
+
+def _venue_stars(paper: dict) -> int:
+    """Rate venue quality 1-5 stars."""
+    venue = paper.get("venue", "").lower()
+    source = paper.get("source", "").lower()
+    # Check venue name against known tiers
+    for name, stars in VENUE_TIER.items():
+        if name in venue:
+            return stars
+    # Fallback: arXiv papers get 2, unknown venues get 2
+    if source == "arxiv" or "arxiv" in venue:
+        return 2
+    return 2
+
+
+def _relevance_stars(paper: dict) -> int:
+    """Rate relevance to active projects 1-5 stars."""
+    matches = paper.get("project_matches", [])
+    if not matches:
+        return 1
+    top_score = matches[0][1]
+    num_projects = len(matches)
+    # High keyword overlap + multiple projects = very relevant
+    if top_score >= 4 and num_projects >= 2:
+        return 5
+    if top_score >= 3 or (top_score >= 2 and num_projects >= 2):
+        return 4
+    if top_score >= 2:
+        return 3
+    if num_projects >= 2:
+        return 3
+    return 2
+
+
+def _impact_stars(paper: dict) -> int:
+    """Rate potential impact 1-5 stars based on citations, venue, recency."""
+    citations = paper.get("citations", 0) or 0
+    venue_q = _venue_stars(paper)
+
+    # High citations for a recent paper = high impact
+    if citations >= 50:
+        return 5
+    if citations >= 20:
+        return 4
+    if citations >= 5:
+        return 3
+
+    # No citations yet (new paper) — use venue as proxy
+    if venue_q >= 4:
+        return 4
+    if venue_q >= 3:
+        return 3
+    return 2
+
+
+def rate_paper(paper: dict) -> dict:
+    """Add quality, relevance, and impact ratings to a paper."""
+    paper["rating_quality"] = _venue_stars(paper)
+    paper["rating_relevance"] = _relevance_stars(paper)
+    paper["rating_impact"] = _impact_stars(paper)
+    paper["rating_overall"] = round(
+        (paper["rating_quality"] * 0.3
+         + paper["rating_relevance"] * 0.4
+         + paper["rating_impact"] * 0.3), 1
+    )
+    return paper
+
+
+def stars(n: int) -> str:
+    """Render star rating as emoji string."""
+    return "+" * n + "." * (5 - n)
 
 # ---------------------------------------------------------------------------
 # Markdown generation
@@ -256,13 +349,14 @@ def format_authors(authors: list[str]) -> str:
 def generate_digest(papers: list[dict], repos: list[dict],
                     digest_date: str, days_back: int) -> str:
     """Generate the full markdown digest."""
-    # Score and sort papers
+    # Score, rate, and sort papers
     scored = []
     for p in papers:
         matches = score_paper(p)
         if matches:
             p["project_matches"] = matches
             p["top_score"] = matches[0][1]
+            rate_paper(p)
             scored.append(p)
 
     # Deduplicate by title similarity
@@ -275,7 +369,8 @@ def generate_digest(papers: list[dict], repos: list[dict],
             unique.append(p)
     scored = unique
 
-    scored.sort(key=lambda x: x["top_score"], reverse=True)
+    # Sort by overall rating (weighted: relevance 40%, quality 30%, impact 30%)
+    scored.sort(key=lambda x: x["rating_overall"], reverse=True)
 
     # Top picks for the at-a-glance table
     top_picks = scored[:8]
@@ -293,18 +388,24 @@ def generate_digest(papers: list[dict], repos: list[dict],
     lines.append(f"> **Read time:** ~12 min | Papers sorted by relevance to active projects\n")
     lines.append("---\n")
 
+    # Rating legend
+    lines.append("## Rating Guide\n")
+    lines.append("> **Quality** = venue prestige | **Relevance** = match to your projects | **Impact** = citations + venue")
+    lines.append("> Scale: `+++++` (5/5) to `+....` (1/5) | Papers sorted by overall score\n")
+
     # At-a-glance table
     lines.append("## At a Glance\n")
-    lines.append("| # | Paper | Why it matters | Project link |")
-    lines.append("|---|---|---|---|")
+    lines.append("| # | Paper | Quality | Relevance | Impact | Project link |")
+    lines.append("|---|---|---|---|---|---|")
     for i, p in enumerate(top_picks, 1):
-        title_short = p["title"][:80] + ("..." if len(p["title"]) > 80 else "")
+        title_short = p["title"][:70] + ("..." if len(p["title"]) > 70 else "")
         url = p.get("url", "")
         title_cell = f"[{title_short}]({url})" if url else title_short
         proj_links = ", ".join(m[0] for m in p["project_matches"][:2])
-        # First sentence of summary as "why"
-        why = p.get("summary", "")[:120].rstrip(".") + "."
-        lines.append(f"| {i} | {title_cell} | {why} | {proj_links} |")
+        q = stars(p["rating_quality"])
+        r = stars(p["rating_relevance"])
+        im = stars(p["rating_impact"])
+        lines.append(f"| {i} | {title_cell} | `{q}` | `{r}` | `{im}` | {proj_links} |")
     lines.append("")
 
     lines.append("---\n")
@@ -312,23 +413,24 @@ def generate_digest(papers: list[dict], repos: list[dict],
     # Journal papers section (no cap — show all relevant)
     if journal_papers:
         lines.append("## Journal Papers\n")
-        for p in journal_papers:
+        for p in sorted(journal_papers, key=lambda x: x["rating_overall"], reverse=True):
             venue = p.get("venue", "Unknown venue")
             year = p.get("year", "")
             url = p.get("url", "")
-            # Title with inline link
             if url:
                 lines.append(f"### [{p['title']}]({url})")
             else:
                 lines.append(f"### {p['title']}")
             lines.append(f"**{venue}** {year} | {format_authors(p['authors'])}")
+            # Ratings bar
+            q = stars(p["rating_quality"])
+            r = stars(p["rating_relevance"])
+            im = stars(p["rating_impact"])
+            lines.append(f"Quality `{q}` | Relevance `{r}` | Impact `{im}` | Overall **{p['rating_overall']}/5**")
             lines.append("")
-            # Summary
             summary = p.get("summary", "")
             if summary:
-                # First 2-3 sentences as summary
                 lines.append(f"**Summary:** {summary[:400]}\n")
-            # Takeaway — connect to project
             matches = p.get("project_matches", [])
             if matches:
                 proj_names = ", ".join(m[0] for m in matches)
@@ -339,20 +441,21 @@ def generate_digest(papers: list[dict], repos: list[dict],
     # arXiv papers section (no cap — show all relevant)
     if arxiv_papers:
         lines.append("## arXiv Preprints\n")
-        for p in arxiv_papers:
+        for p in sorted(arxiv_papers, key=lambda x: x["rating_overall"], reverse=True):
             url = p.get("url", "")
-            # Title with inline link
             if url:
                 lines.append(f"### [{p['title']}]({url})")
             else:
                 lines.append(f"### {p['title']}")
             lines.append(f"**arXiv {p.get('id', '')}** | {p.get('date', '')} | {format_authors(p['authors'])}")
+            q = stars(p["rating_quality"])
+            r = stars(p["rating_relevance"])
+            im = stars(p["rating_impact"])
+            lines.append(f"Quality `{q}` | Relevance `{r}` | Impact `{im}` | Overall **{p['rating_overall']}/5**")
             lines.append("")
-            # Summary
             summary = p.get("summary", "")
             if summary:
                 lines.append(f"**Summary:** {summary[:400]}\n")
-            # Takeaway — connect to project
             matches = p.get("project_matches", [])
             if matches:
                 proj_names = ", ".join(m[0] for m in matches)
