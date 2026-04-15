@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'digests/digest-*.md'
+  workflow_dispatch:
 
 permissions:
   contents: read
