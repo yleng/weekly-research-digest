@@ -36,38 +36,37 @@ jobs:
           DIGEST_FILE: ${{ steps.find.outputs.file }}
           DIGEST_DATE: ${{ steps.find.outputs.date }}
         run: |
-          python3 << 'PYEOF'
-          import json, os, urllib.request, sys
+          # Debug: check key length (never print actual key)
+          echo "API key length: ${#RESEND_API_KEY}"
+          echo "API key prefix: ${RESEND_API_KEY:0:3}"
+          echo "Digest file: $DIGEST_FILE"
+          echo "Digest date: $DIGEST_DATE"
 
-          digest_file = os.environ["DIGEST_FILE"]
-          digest_date = os.environ["DIGEST_DATE"]
-          api_key = os.environ["RESEND_API_KEY"]
+          # Send via curl (simpler, fewer escaping issues)
+          CONTENT=$(cat "$DIGEST_FILE" | head -c 8000)
+          LINK="https://github.com/yleng/weekly-research-digest/blob/main/$DIGEST_FILE"
 
-          with open(digest_file) as f:
-              content = f.read()
+          # Use jq to safely build JSON
+          PAYLOAD=$(jq -n \
+            --arg from "Weekly Digest <onboarding@resend.dev>" \
+            --arg to "yleng@mit.edu" \
+            --arg subject "[Weekly Research Digest] $DIGEST_DATE" \
+            --arg text "Your weekly research digest for $DIGEST_DATE is ready.\n\nView on GitHub: $LINK\n\n---\n\n$CONTENT" \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')
 
-          link = f"https://github.com/yleng/weekly-research-digest/blob/main/{digest_file}"
-          text = f"Your weekly research digest for {digest_date} is ready.\n\nFull digest (best viewed on GitHub): {link}\n\n---\n\n{content}"
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST 'https://api.resend.com/emails' \
+            -H "Authorization: Bearer $RESEND_API_KEY" \
+            -H 'Content-Type: application/json' \
+            -d "$PAYLOAD")
 
-          payload = json.dumps({
-              "from": "Weekly Digest <onboarding@resend.dev>",
-              "to": ["yleng@mit.edu"],
-              "subject": f"[Weekly Research Digest] {digest_date}",
-              "text": text
-          }).encode()
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
 
-          req = urllib.request.Request(
-              "https://api.resend.com/emails",
-              data=payload,
-              headers={
-                  "Authorization": f"Bearer {api_key}",
-                  "Content-Type": "application/json"
-              }
-          )
-          try:
-              resp = urllib.request.urlopen(req)
-              print(f"Email sent: {resp.read().decode()}")
-          except Exception as e:
-              print(f"Email failed: {e}", file=sys.stderr)
-              sys.exit(1)
-          PYEOF
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            echo "Email sending failed"
+            exit 1
+          fi
+          echo "Email sent successfully"
