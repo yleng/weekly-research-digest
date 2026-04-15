@@ -36,22 +36,23 @@ jobs:
           DIGEST_FILE: ${{ steps.find.outputs.file }}
           DIGEST_DATE: ${{ steps.find.outputs.date }}
         run: |
-          # Debug: check key length (never print actual key)
-          echo "API key length: ${#RESEND_API_KEY}"
-          echo "API key prefix: ${RESEND_API_KEY:0:3}"
-          echo "Digest file: $DIGEST_FILE"
-          echo "Digest date: $DIGEST_DATE"
-
-          # Send via curl (simpler, fewer escaping issues)
-          CONTENT=$(cat "$DIGEST_FILE" | head -c 8000)
           LINK="https://github.com/yleng/weekly-research-digest/blob/main/$DIGEST_FILE"
 
-          # Use jq to safely build JSON
+          # Read full digest (no truncation)
+          CONTENT=$(cat "$DIGEST_FILE")
+
+          # Use jq to safely build JSON (handles all escaping)
           PAYLOAD=$(jq -n \
             --arg from "Weekly Digest <onboarding@resend.dev>" \
             --arg to "yleng@mit.edu" \
             --arg subject "[Weekly Research Digest] $DIGEST_DATE" \
-            --arg text "Your weekly research digest for $DIGEST_DATE is ready.\n\nView on GitHub: $LINK\n\n---\n\n$CONTENT" \
+            --arg text "Your weekly research digest for $DIGEST_DATE is ready.
+
+View on GitHub (best formatting): $LINK
+
+---
+
+$CONTENT" \
             '{from: $from, to: [$to], subject: $subject, text: $text}')
 
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST 'https://api.resend.com/emails' \

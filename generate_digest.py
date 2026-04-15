@@ -299,49 +299,65 @@ def generate_digest(papers: list[dict], repos: list[dict],
     lines.append("|---|---|---|---|")
     for i, p in enumerate(top_picks, 1):
         title_short = p["title"][:80] + ("..." if len(p["title"]) > 80 else "")
+        url = p.get("url", "")
+        title_cell = f"[{title_short}]({url})" if url else title_short
         proj_links = ", ".join(m[0] for m in p["project_matches"][:2])
         # First sentence of summary as "why"
         why = p.get("summary", "")[:120].rstrip(".") + "."
-        lines.append(f"| {i} | {title_short} | {why} | {proj_links} |")
+        lines.append(f"| {i} | {title_cell} | {why} | {proj_links} |")
     lines.append("")
 
     lines.append("---\n")
 
-    # Journal papers section
+    # Journal papers section (no cap — show all relevant)
     if journal_papers:
         lines.append("## Journal Papers\n")
-        for p in journal_papers[:15]:
+        for p in journal_papers:
             venue = p.get("venue", "Unknown venue")
             year = p.get("year", "")
-            lines.append(f"### {p['title']}")
+            url = p.get("url", "")
+            # Title with inline link
+            if url:
+                lines.append(f"### [{p['title']}]({url})")
+            else:
+                lines.append(f"### {p['title']}")
             lines.append(f"**{venue}** {year} | {format_authors(p['authors'])}")
-            if p.get("url"):
-                lines.append(f"[Link]({p['url']})")
             lines.append("")
-            if p.get("summary"):
-                lines.append(f"{p['summary'][:300]}\n")
-            # Your angle
+            # Summary
+            summary = p.get("summary", "")
+            if summary:
+                # First 2-3 sentences as summary
+                lines.append(f"**Summary:** {summary[:400]}\n")
+            # Takeaway — connect to project
             matches = p.get("project_matches", [])
             if matches:
                 proj_names = ", ".join(m[0] for m in matches)
-                lines.append(f"> **Your angle:** Relevant to **{proj_names}**. {CFG['active_projects'].get(matches[0][0], '')}\n")
+                proj_desc = CFG['active_projects'].get(matches[0][0], '')
+                lines.append(f"> **What you can learn → {proj_names}:** {proj_desc}\n")
             lines.append("---\n")
 
-    # arXiv papers section
+    # arXiv papers section (no cap — show all relevant)
     if arxiv_papers:
         lines.append("## arXiv Preprints\n")
-        for p in arxiv_papers[:15]:
-            lines.append(f"### {p['title']}")
+        for p in arxiv_papers:
+            url = p.get("url", "")
+            # Title with inline link
+            if url:
+                lines.append(f"### [{p['title']}]({url})")
+            else:
+                lines.append(f"### {p['title']}")
             lines.append(f"**arXiv {p.get('id', '')}** | {p.get('date', '')} | {format_authors(p['authors'])}")
-            if p.get("url"):
-                lines.append(f"[Link]({p['url']})")
             lines.append("")
-            if p.get("summary"):
-                lines.append(f"{p['summary'][:300]}\n")
+            # Summary
+            summary = p.get("summary", "")
+            if summary:
+                lines.append(f"**Summary:** {summary[:400]}\n")
+            # Takeaway — connect to project
             matches = p.get("project_matches", [])
             if matches:
                 proj_names = ", ".join(m[0] for m in matches)
-                lines.append(f"> **Your angle:** Relevant to **{proj_names}**. {CFG['active_projects'].get(matches[0][0], '')}\n")
+                proj_desc = CFG['active_projects'].get(matches[0][0], '')
+                lines.append(f"> **What you can learn → {proj_names}:** {proj_desc}\n")
             lines.append("---\n")
 
     # GitHub repos section
