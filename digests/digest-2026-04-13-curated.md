@@ -1,0 +1,285 @@
+# Weekly Research Digest — Apr 7–13, 2026
+
+> **For:** Yan Leng | **Focus:** Network science, LLM interpretability, human-AI decision making, causal inference, computational social science
+> **Read time:** ~12 min | Papers sorted by relevance to your active projects
+
+---
+
+## At a Glance
+
+| # | What caught my eye | Why it matters to you | Your project link |
+|---|---|---|---|
+| 1 | LLM agents cooperate instead of playing Nash in network games | Directly tests your PNAS cooperation/intervention theory with AI agents | Cooperation PNAS, Net-DPO |
+| 2 | Sparse autoencoders now steer VLA models interpretably | Extends your SAE + activation-steering pipeline to embodied AI | Inf_Steering, Preference_Geometry |
+| 3 | LLM populations form emergent social conventions with collective bias | Validates your curation-divergence / monoculture thesis empirically | PNAS Adaptive Monoculture |
+| 4 | Human-AI feedback loops amplify bias beyond human-human loops | Mechanism for your AI governance / welfare-reversal arguments | PNAS AI Governance |
+| 5 | Econometric framework for LLMs as text-measurement tools | Methodological twin to your LLMMeasurements paper | LLMMeasurements |
+
+---
+
+## Science & Nature Family
+
+### Network structure shapes consensus dynamics through individual decisions
+**PNAS** 123(2), Jan 2026 | [DOI](https://www.pnas.org/doi/abs/10.1073/pnas.2520483123)
+
+How shared narratives emerge in decentralized online networks. Shows network structure shapes group consensus *beyond* simplified group coordination — individuals' decision rules interact with topology.
+
+> **Your angle:** Complements your cooperation-on-networks PNAS paper. Their "consensus from structure" result is the flip side of your "intervention creates long-lived cooperation" claim. Cite as motivation: even without intervention, structure matters — your contribution is showing *temporary* nudges can lock in cooperation.
+
+---
+
+### Emergent social conventions and collective bias in LLM populations
+**Science Advances** 2026 | [DOI](https://www.science.org/doi/10.1126/sciadv.adu9368)
+
+Embeds LLM populations in realistic social networks and shows they bootstrap social conventions. But: network topology creates **collective bias** — certain conventions dominate not because they're better, but because of structural position.
+
+> **Your angle:** This is empirical evidence for your "Adaptive Monoculture" paper. Their "collective bias from network structure" = your "AI steering depletes adaptive reserve." You might cite this as the LLM-agent analog of your theoretical prediction.
+
+---
+
+### Could humans and AI become a new evolutionary individual?
+**PNAS** 2026 | [DOI](https://www.pnas.org/doi/10.1073/pnas.2509122122)
+
+Provocative piece asking whether human-AI coupling meets the criteria for an evolutionary transition in individuality (ETI). Uses evolutionary theory to frame AI alignment.
+
+> **Your angle:** Far-field but interesting framing for your AI governance paper. The "optimal scale of governance" question maps onto their "at what level does selection operate on human-AI units?"
+
+---
+
+### AI assessment changes human behavior
+**PNAS** 2026 | [DOI](https://www.pnas.org/doi/10.1073/pnas.2425439122)
+
+When people know AI is evaluating them, they change behavior — not just what they report, but what they actually *do*. Demonstrates a Hawthorne-like effect specific to AI evaluation.
+
+> **Your angle:** Relevant to your LLM_Prompt_Variations work. If AI measurement changes the thing being measured, your econometric framework needs to account for reflexivity. Also relevant to LLMMeasurements — audited measurement might itself alter outcomes.
+
+---
+
+### How human-AI feedback loops alter human perceptual, emotional and social judgements
+**Nature Human Behaviour** 2026 | [DOI](https://www.nature.com/articles/s41562-024-02077-2)
+
+Feedback loops between humans and AI amplify biases **more than** human-human feedback loops. Participants are largely unaware of AI's influence, making them more susceptible.
+
+> **Your angle:** Mechanistic support for your "competing AI intermediaries fragment beliefs" (Science Advances paper). Their bias amplification through feedback loops is the micro-mechanism for your macro-level phase transition in curation divergence.
+
+---
+
+### When combinations of humans and AI are useful: A systematic review and meta-analysis
+**Nature Human Behaviour** 2024 (still generating citations) | [DOI](https://www.nature.com/articles/s41562-024-02024-1)
+
+Surprising result: human-AI combinations performed **worse** than the best of humans or AI alone on decision tasks, but **better** on creation tasks.
+
+> **Your angle:** Important nuance for your Net-DPO and human-AI decision making work. The decision/creation distinction suggests your "personalization-consistency tradeoff" might behave differently depending on task type.
+
+---
+
+### LLM-generated messages can persuade humans on policy issues
+**Nature Communications** 2026 | [DOI](https://www.nature.com/articles/s41467-025-61345-5)
+
+Three preregistered experiments showing LLM-generated messages are persuasive on policy issues. Effect sizes comparable to human-crafted messages.
+
+> **Your angle:** Connects to your misinformation / belief-updating work. If LLMs can persuade as well as humans, the "competing AI intermediaries" in your PNAS paper are even more dangerous than assumed.
+
+---
+
+### A brain-inspired agentic architecture to improve planning with LLMs
+**Nature Communications** 2026 | [DOI](https://www.nature.com/articles/s41467-025-63804-5)
+
+Brain-inspired architecture separating "fast" reactive and "slow" deliberative planning in LLM agents. Improves multi-step task completion.
+
+> **Your angle:** Architectural insight for your visible-context thresholds (NMI) paper. Their fast/slow decomposition maps onto your cognitive bottleneck framework — the "phase transition" in tool use might correspond to the switch between fast and slow modes.
+
+---
+
+### LLMs without grounding recover non-sensorimotor but not sensorimotor features
+**Nature Human Behaviour** 2025 | [DOI](https://www.nature.com/articles/s41562-025-02203-8)
+
+LLMs align with human concept representations in abstract/non-sensorimotor domains but diverge in sensorimotor ones. Visual training helps close the gap.
+
+> **Your angle:** Directly relevant to your "Visual Evidence Response Curves" (NMI) paper. Their result provides the theoretical grounding: multimodal grounding failures exist because text-only models literally lack sensorimotor representations.
+
+---
+
+## ML Conferences & arXiv Highlights
+
+### Competition and Cooperation of LLM Agents in Games
+**arXiv 2604.00487** | Apr 2026 | [Link](https://arxiv.org/abs/2604.00487)
+
+LLM agents in network resource allocation and Cournot games tend to **cooperate** rather than converge to Nash equilibria. Chain-of-thought reveals fairness reasoning drives this.
+
+> **Your angle:** This is almost a simulation version of your cooperation PNAS paper. Their "cooperation emerges from fairness reasoning" complements your "temporary prosocial intervention creates long-lived cooperation." Together they suggest cooperation is more robust than standard game theory predicts — both in human networks and LLM populations.
+
+---
+
+### More Capable, Less Cooperative? When LLMs Fail at Zero-Cost Collaboration
+**arXiv 2604.07821** | Apr 2026
+
+As LLMs become more capable, their cooperation rate in zero-cost collaboration tasks actually *drops*. Capability and cooperativeness are decoupled.
+
+> **Your angle:** Important counterpoint for your Net-DPO and governance papers. If more capable models are less cooperative, the "optimal scale of governance" shifts — you may need stronger governance structures for frontier models.
+
+---
+
+### High Volatility and Action Bias Distinguish LLMs from Humans in Group Coordination
+**arXiv 2604.02578** | Apr 2026
+
+LLMs show higher action volatility and systematic action bias compared to humans in group coordination games. They converge faster but to different equilibria.
+
+> **Your angle:** Methodological caution for anyone using LLMs as human proxies in your game-theory-on-networks experiments. The behavioral signature is distinct — support for your position that LLM behavior needs its own measurement framework (LLMMeasurements).
+
+---
+
+### Do Agent Societies Develop Intellectual Elites?
+**arXiv 2604.02674** | Apr 2026
+
+Multi-agent LLM societies develop emergent hierarchies — some agents become "intellectual elites" concentrating influence. Network position predicts who becomes elite.
+
+> **Your angle:** Network inequality via AI mirrors your "allocation-level structural targeting" (Science Advances) paper. Their emergent elites = your bridging-capital inequality, but in a purely artificial society. Strengthens the universality claim.
+
+---
+
+### Aligned Agents, Biased Swarm: Measuring Bias Amplification
+**arXiv 2604.08963** | Apr 2026
+
+Even individually aligned LLM agents produce collective bias when operating as a swarm. Individual alignment != collective alignment.
+
+> **Your angle:** Core mechanism for your "Adaptive Monoculture" paper. Their result = your "fixed-objective AI steering depletes adaptive reserve" stated in multi-agent terms. Individual optimization -> collective homogenization.
+
+---
+
+### Sparse Autoencoders Reveal Interpretable and Steerable Features in VLA Models
+**arXiv 2603.19183** | Mar 2026 | [Link](https://arxiv.org/html/2603.19183v1)
+
+SAE features in Vision-Language-Action models are interpretable, general, and **causally** steerable — flipping individual features predictably changes robot behavior.
+
+> **Your angle:** Extends your Inf_Steering activation-editing work to embodied domains. If SAE features are steerable in VLA models, your "influence-aligned steering" framework might generalize beyond text LLMs. Potential ICML extension.
+
+---
+
+### CorrSteer: Generation-Time LLM Steering via Correlated SAE Features
+**arXiv 2508.12535** | Updated 2026
+
+Fully automated pipeline for discovering steering-effective SAE features by correlating task performance with activations during inference. No contrastive datasets needed.
+
+> **Your angle:** Directly relevant to Inf_Steering. Their correlation-based feature discovery could replace or complement your minimum-norm activation edit approach. Key difference: they optimize for empirical steering effect, you optimize for causal provenance.
+
+---
+
+### Causal Language Control in Multilingual Transformers via Sparse Feature Steering
+**arXiv 2507.13410** | [Link](https://arxiv.org/html/2507.13410)
+
+Uses sparse autoencoder features for **causal** language control in multilingual models. Steering specific features induces language shifts while preserving semantics.
+
+> **Your angle:** Proof of concept for "constrained causal abstraction" applied to a concrete task. Their causal-control-via-SAE approach validates the methodological path you're taking in the NeurIPS constrained causal abstraction paper.
+
+---
+
+### Mechanistic Interpretability for LLM Alignment: Progress, Challenges, Future Directions
+**arXiv 2602.11180** | Jan 2026 (still hot) | [Link](https://arxiv.org/abs/2602.11180)
+
+Comprehensive survey: circuit discovery, feature visualization, activation steering, causal intervention for alignment. Maps the field as of early 2026.
+
+> **Your angle:** Position your NeurIPS "Provenance of Economic Preference-Like Behavior" paper relative to this survey. Your causal-tracing-across-training-stages approach fills a gap they identify: most work studies models at a single snapshot, not across training dynamics.
+
+---
+
+### Psychological Concept Neurons: Can Neural Control Bias Probing and Shift Generation?
+**arXiv 2604.11802** | Apr 2026
+
+Using Big Five personality constructs, finds specific neurons controlling personality-like behavior in LLMs. Probing + steering via identified neurons.
+
+> **Your angle:** Closely related to Provenance_Preference. They find "personality neurons"; you find "economic preference neurons." Their methodology (probe -> steer -> verify) parallels yours. Compare approaches in your NeurIPS paper.
+
+---
+
+### Large Language Models: An Applied Econometric Framework
+**arXiv 2412.07031** | Dec 2024, still highly cited | [Link](https://arxiv.org/abs/2412.07031)
+
+Formal econometric treatment of LLMs as measurement tools for text data. Addresses validity, reliability, and efficiency of LLM-based text measures in causal inference.
+
+> **Your angle:** This is the methodological sibling of your LLMMeasurements paper. Key difference: they focus on measurement validity; you focus on *audited calibration + doubly-robust AIPW*. Cite each other — your work extends their framework with a concrete uncertainty-aware pipeline.
+
+---
+
+### Revisiting Prompt Sensitivity: The Role of Prompt Underspecification
+**arXiv 2602.04297** | Feb 2026 | [Link](https://arxiv.org/abs/2602.04297)
+
+Much of "prompt sensitivity" is actually "prompt underspecification" — vague prompts -> high variance; specific prompts -> stable outputs.
+
+> **Your angle:** Directly relevant to your LLM_Prompt_Variations (Management Science) paper. Their result partitions the variance: some sensitivity is real model instability, some is researcher-side underspecification. Your econometric treatment should account for this decomposition.
+
+---
+
+## Management & IS Journals
+
+### Management Science: Virtual Special Issue on AI for Finance and Business Decisions
+**Call open, decisions expected before July 2026** | [Link](https://pubsonline.informs.org/doi/10.1287/mnsc.2024.Call.V70.n10)
+
+> **Your angle:** Your LLM_Prompt_Variations and Net-DPO papers fit the spirit. Consider a submission or cite the SI in your framing.
+
+---
+
+### MIS Quarterly: Special Issue on AI-Information Assurance Nexus
+**Call open** | [Link](https://misq.umn.edu/pages/call_for_papers_ai_ia)
+
+> **Your angle:** Your curation-divergence / belief-fragmentation work has an information-quality angle. A MISQ version framing "AI intermediaries fragment information quality" could fit this SI.
+
+---
+
+### Examining human reliance on AI in decision making
+**Scientific Reports** 2026 | [DOI](https://www.nature.com/articles/s41598-026-34983-y)
+
+People with more positive AI attitudes show *worse* discriminability when using AI guidance. Trust in AI -> over-reliance -> worse outcomes.
+
+> **Your angle:** The attitude -> over-reliance -> performance-degradation pipeline is a micro-foundation for why your "adaptive monoculture" emerges at the societal level.
+
+---
+
+## Trending GitHub Repos
+
+### Agent Infrastructure
+
+| Repo | Stars | What it does | Why you'd care |
+|---|---|---|---|
+| [OpenClaude](https://github.com/Gitlawb/openclaude) | 19.4k | Open-source Claude Code CLI for 200+ models | Run your research pipeline on any model |
+| DeerFlow 2.0 (ByteDance) | +13.6k/wk | SuperAgent: auto-decomposes complex tasks across sub-agents | Multi-agent research orchestration |
+| [OpenHarness](https://github.com/HKUDS/OpenSpace) (HKU) | 7.6k | Universal agent harness — task execution, tool invocation, state mgmt | Standardize your auto-research pipeline |
+| Google ADK | 8.2k | Google's Agent Development Kit in Python | Alternative to Claude Code for experiments |
+
+### Productivity & Skills
+
+| Repo | Stars | What it does | Why you'd care |
+|---|---|---|---|
+| [everything-claude-code](https://github.com/affaan-m/everything-claude-code) | 155k | Skills, memory, security for Claude Code, Codex, Cursor | Enhance your NeuralMJD pipeline |
+| [antigravity-awesome-skills](https://github.com/sickn33/antigravity-awesome-skills) | — | 1,400+ agentic skills across all coding agents | Browse for research-relevant skills |
+| [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | — | Curated hooks, skills, slash-commands, orchestrators | Community best practices |
+| Codex Plugin for Claude Code | — | Call Codex from within Claude Code | Cross-agent verification |
+
+### Memory & Context
+
+| Repo | Stars | What it does | Why you'd care |
+|---|---|---|---|
+| MemPalace | 24k | Highest-scoring AI memory system benchmarked | Could improve your wiki/memory architecture |
+| Caveman skill | 7k | Cuts 65% tokens via simplified language | Token efficiency for long research sessions |
+
+---
+
+## ML Conference Deadlines & Opportunities
+
+| Event | Date | Relevance |
+|---|---|---|
+| **ICML 2026 submission** | Already open | Your Inf_Steering, constrained causal abstraction |
+| **ICML 2026 Mech Interp Workshop** | Paper deadline May 8 | Workshop paper from Preference_Geometry or Inf_Steering |
+| **NeurIPS 2026** | ~May abstract, ~Jun full | Your provenance_preference paper (88-92% acceptance odds) |
+| **Management Science AI SI** | Decisions by Jul 2026 | LLM_Prompt_Variations, Net-DPO |
+| **MISQ AI-IA Nexus SI** | Open | Curation-divergence reframed for IS |
+
+---
+
+## One-Paragraph Synthesis
+
+This week's pattern: **the gap between individual-level AI alignment and collective-level outcomes is widening.** Multiple papers independently show that individually "aligned" or "fair" AI agents produce collective bias, hierarchy, and monoculture when embedded in networks (arXiv 2604.08963, Science Advances adu9368, arXiv 2604.02674). This is exactly your research program's thesis across several papers (Adaptive Monoculture, Competing AI Intermediaries, Allocation-Level Structural Targeting). The tooling to study this mechanistically is also maturing: SAE-based steering now works in VLA models, not just text LLMs, and automated feature-discovery pipelines (CorrSteer) remove the bottleneck of hand-crafted contrastive datasets. Your Inf_Steering and Preference_Geometry work is well-positioned to ride this wave. Actionable: consider citing the April 2026 multi-agent results in your PNAS revisions, and evaluate CorrSteer as a complement to your minimum-norm steering approach.
+
+---
+
+*Generated by Claude Code weekly monitor | Next digest: Apr 20, 2026*
