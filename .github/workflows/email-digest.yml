@@ -1,4 +1,4 @@
-name: Notify Weekly Digest
+name: Email Weekly Digest
 
 on:
   push:
@@ -6,11 +6,10 @@ on:
       - 'digests/digest-*.md'
 
 permissions:
-  issues: write
   contents: read
 
 jobs:
-  notify:
+  email-digest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,16 +29,42 @@ jobs:
             echo "date=$DATE" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create GitHub Issue with digest
+      - name: Send digest email via Resend
         if: steps.find.outputs.found == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          # Read digest content
-          BODY=$(cat "${{ steps.find.outputs.file }}")
+          # Read digest and escape for JSON
+          CONTENT=$(cat "${{ steps.find.outputs.file }}")
+          DATE="${{ steps.find.outputs.date }}"
+          LINK="https://github.com/yleng/weekly-research-digest/blob/main/${{ steps.find.outputs.file }}"
 
-          # Create issue (GitHub emails you automatically)
-          gh issue create \
-            --title "Weekly Digest: ${{ steps.find.outputs.date }}" \
-            --body "$BODY" \
-            --label "digest"
+          # Build plain text email
+          TEXT=$(printf "Your weekly research digest for %s is ready.\n\nFull digest (best viewed on GitHub): %s\n\n---\n\n%s" "$DATE" "$LINK" "$CONTENT")
+
+          # Send via Resend API
+          # Use python to handle JSON escaping properly
+          python3 -c "
+          import json, urllib.request, sys
+
+          text = sys.stdin.read()
+          payload = json.dumps({
+              'from': 'Weekly Digest <onboarding@resend.dev>',
+              'to': ['yleng@mit.edu'],
+              'subject': f'[Weekly Research Digest] ${{ steps.find.outputs.date }}',
+              'text': text
+          }).encode()
+
+          req = urllib.request.Request(
+              'https://api.resend.com/emails',
+              data=payload,
+              headers={
+                  'Authorization': 'Bearer ${{ secrets.RESEND_API_KEY }}',
+                  'Content-Type': 'application/json'
+              }
+          )
+          try:
+              resp = urllib.request.urlopen(req)
+              print(f'Email sent: {resp.read().decode()}')
+          except Exception as e:
+              print(f'Email failed: {e}', file=sys.stderr)
+              sys.exit(1)
+          " <<< "$TEXT"
