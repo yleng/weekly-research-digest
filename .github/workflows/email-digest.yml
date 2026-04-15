@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  issues: write
   contents: read
 
 jobs:
@@ -30,45 +31,22 @@ jobs:
             echo "date=$DATE" >> $GITHUB_OUTPUT
           fi
 
-      - name: Send digest email via Resend
+      - name: Create GitHub Issue with digest
         if: steps.find.outputs.found == 'true'
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          DIGEST_FILE: ${{ steps.find.outputs.file }}
-          DIGEST_DATE: ${{ steps.find.outputs.date }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python3 << 'PYEOF'
-          import json, os, urllib.request, sys
+          DATE="${{ steps.find.outputs.date }}"
+          FILE="${{ steps.find.outputs.file }}"
+          LINK="https://github.com/yleng/weekly-research-digest/blob/main/$FILE"
 
-          api_key = os.environ["RESEND_API_KEY"]
-          digest_file = os.environ["DIGEST_FILE"]
-          digest_date = os.environ["DIGEST_DATE"]
+          # Build issue body: link + full digest content
+          BODY=$(printf "**[View with full formatting on GitHub](%s)**\n\n---\n\n%s" "$LINK" "$(cat "$FILE")")
 
-          with open(digest_file) as f:
-              content = f.read()
+          # Create issue — GitHub emails you automatically via Watch notifications
+          gh issue create \
+            --title "Weekly Digest: $DATE" \
+            --body "$BODY" \
+            --label "digest"
 
-          link = f"https://github.com/yleng/weekly-research-digest/blob/main/{digest_file}"
-          text = f"Your weekly research digest for {digest_date} is ready.\n\nView on GitHub (best formatting): {link}\n\n---\n\n{content}"
-
-          payload = json.dumps({
-              "from": "Weekly Digest <onboarding@resend.dev>",
-              "to": ["yleng@mit.edu"],
-              "subject": f"[Weekly Research Digest] {digest_date}",
-              "text": text
-          }).encode()
-
-          req = urllib.request.Request(
-              "https://api.resend.com/emails",
-              data=payload,
-              headers={
-                  "Authorization": f"Bearer {api_key}",
-                  "Content-Type": "application/json"
-              }
-          )
-          try:
-              resp = urllib.request.urlopen(req)
-              print(f"Email sent: {resp.read().decode()}")
-          except Exception as e:
-              print(f"Email failed: {e}", file=sys.stderr)
-              sys.exit(1)
-          PYEOF
+          echo "Issue created for $DATE"
