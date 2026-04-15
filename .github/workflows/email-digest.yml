@@ -1,0 +1,45 @@
+name: Notify Weekly Digest
+
+on:
+  push:
+    paths:
+      - 'digests/digest-*.md'
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find new digest file
+        id: find
+        run: |
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'digests/digest-*.md' | grep -v curated | head -1)
+          if [ -z "$FILE" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "file=$FILE" >> $GITHUB_OUTPUT
+            echo "found=true" >> $GITHUB_OUTPUT
+            DATE=$(echo "$FILE" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            echo "date=$DATE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Issue with digest
+        if: steps.find.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Read digest content
+          BODY=$(cat "${{ steps.find.outputs.file }}")
+
+          # Create issue (GitHub emails you automatically)
+          gh issue create \
+            --title "Weekly Digest: ${{ steps.find.outputs.date }}" \
+            --body "$BODY" \
+            --label "digest"
