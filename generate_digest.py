@@ -500,75 +500,189 @@ def generate_digest(papers: list[dict], repos: list[dict],
 # Audio generation
 # ---------------------------------------------------------------------------
 
+def _proj_friendly(name: str) -> str:
+    """Convert project key to natural spoken name."""
+    friendly = {
+        "Cooperation_PNAS": "your cooperation on networks paper",
+        "Adaptive_Monoculture": "your adaptive monoculture paper",
+        "Curation_Divergence": "your curation divergence paper",
+        "Structural_Targeting": "your structural targeting paper",
+        "AI_Governance_PNAS": "your AI governance paper",
+        "Provenance_Preference": "your preference provenance paper for NeurIPS",
+        "Constrained_Causal_Abstraction": "your causal abstraction paper for NeurIPS",
+        "Inf_Steering": "your influence steering paper for ICML",
+        "Net_DPO": "your Net DPO paper for Management Science",
+        "LLMMeasurements": "your LLM measurements paper",
+        "LLM_Prompt_Variations": "your prompt variations paper for Management Science",
+        "Visible_Context_Thresholds": "your visible context thresholds paper for Nature Machine Intelligence",
+        "Visual_Evidence_Response": "your visual evidence response paper for Nature Machine Intelligence",
+        "Preference_Geometry": "your preference geometry paper",
+        "Hypergraph_Interpretability": "your hypergraph interpretability paper",
+        "GPT_Pricing_Bias": "your pricing bias paper",
+    }
+    return friendly.get(name, name.replace("_", " "))
+
+
+def _summarize_for_speech(summary: str) -> str:
+    """Extract first 2 clean sentences from abstract for spoken delivery."""
+    if not summary:
+        return ""
+    # Clean up artifacts
+    text = re.sub(r'\s+', ' ', summary).strip()
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    result = " ".join(sentences[:2])
+    # Limit length for listening
+    if len(result) > 350:
+        result = " ".join(sentences[:1])
+    return result
+
+
+def _transition(i: int) -> str:
+    """Conversational transition phrases between papers."""
+    phrases = [
+        "Let's start with something interesting.",
+        "Next up.",
+        "Here's another one worth noting.",
+        "This next one is quite relevant.",
+        "Moving on.",
+        "Here's something a bit different.",
+        "Now, this one caught my attention.",
+        "And another.",
+    ]
+    return phrases[i % len(phrases)]
+
+
+def _rating_word(score: float) -> str:
+    """Convert numeric rating to spoken description."""
+    if score >= 4.0:
+        return "very strong"
+    if score >= 3.5:
+        return "strong"
+    if score >= 3.0:
+        return "solid"
+    if score >= 2.5:
+        return "moderate"
+    return "worth a look"
+
+
 def digest_to_speech_text(scored: list[dict], repos: list[dict],
                           digest_date: str, days_back: int) -> str:
-    """Convert digest data into a natural spoken script for TTS."""
+    """Convert digest data into a conversational podcast script."""
     week_start = (datetime.strptime(digest_date, "%Y-%m-%d") - timedelta(days=days_back)).strftime("%B %d")
     week_end = datetime.strptime(digest_date, "%Y-%m-%d").strftime("%B %d, %Y")
 
     parts = []
-    parts.append(f"Weekly Research Digest, {week_start} to {week_end}.")
+
+    # --- Intro ---
+    parts.append(f"Hey Yan. Welcome to your weekly research digest, covering {week_start} through {week_end}.")
     parts.append("")
 
-    # Top papers overview
-    top = scored[:8]
-    parts.append(f"This week I found {len(scored)} relevant papers. Here are the top {len(top)}.")
-    parts.append("")
-
-    for i, p in enumerate(top, 1):
-        title = p["title"]
-        venue = p.get("venue", "") or p.get("source", "")
-        overall = p.get("rating_overall", 0)
-        matches = p.get("project_matches", [])
-        proj = matches[0][0].replace("_", " ") if matches else "your research"
-        summary = p.get("summary", "")
-        # Take first 2 sentences of summary
-        sentences = re.split(r'(?<=[.!?])\s+', summary)
-        short_summary = " ".join(sentences[:2]) if sentences else ""
-
-        parts.append(f"Number {i}. {title}.")
-        if venue:
-            parts.append(f"Published in {venue}. Overall rating: {overall} out of 5.")
-        if short_summary:
-            parts.append(short_summary)
-        parts.append(f"This connects to your {proj} project.")
-        parts.append("")
-
-    # Remaining papers — brief mentions
-    remaining = scored[8:]
-    if remaining:
-        parts.append(f"And {len(remaining)} more relevant papers this week. Here are quick mentions.")
-        parts.append("")
-        for p in remaining[:12]:  # cap spoken mentions at 20 total
-            title = p["title"]
-            matches = p.get("project_matches", [])
-            proj = matches[0][0].replace("_", " ") if matches else "your research"
-            overall = p.get("rating_overall", 0)
-            parts.append(f"{title}. Rating {overall} out of 5. Relevant to {proj}.")
-        if len(remaining) > 12:
-            parts.append(f"Plus {len(remaining) - 12} more papers in the written digest.")
-        parts.append("")
-
-    # GitHub repos
-    if repos:
-        parts.append(f"On GitHub, {len(repos)} trending repos in your areas this week.")
-        for r in repos[:5]:
-            name = r["name"].split("/")[-1]
-            desc = r["description"][:100] if r["description"] else ""
-            parts.append(f"{name}, with {r['stars']:,} stars. {desc}.")
-        parts.append("")
-
-    # Synthesis
+    # Count what we found
     project_counts: dict[str, int] = {}
     for p in scored:
         for m in p.get("project_matches", []):
             project_counts[m[0]] = project_counts.get(m[0], 0) + 1
     hot = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[:3]
-    if hot:
-        hot_str = ", ".join(f"{p.replace('_', ' ')} with {c} papers" for p, c in hot)
-        parts.append(f"This week's research clusters around: {hot_str}.")
 
-    parts.append("That's your weekly digest. Check the written version for full details and links.")
+    parts.append(f"I scanned the latest publications and found {len(scored)} papers relevant to your work.")
+    if hot:
+        hot_names = ", ".join(_proj_friendly(p) for p, _ in hot[:2])
+        parts.append(f"The biggest clusters this week are around {hot_names}.")
+    parts.append("")
+    parts.append("Let me walk you through the highlights.")
+    parts.append("")
+
+    # --- Deep dive: top 5 papers ---
+    top = scored[:5]
+    for i, p in enumerate(top):
+        title = p["title"]
+        venue = p.get("venue", "") or p.get("source", "")
+        overall = p.get("rating_overall", 0)
+        matches = p.get("project_matches", [])
+        proj = _proj_friendly(matches[0][0]) if matches else "your research"
+        summary = _summarize_for_speech(p.get("summary", ""))
+        rating_desc = _rating_word(overall)
+
+        parts.append(_transition(i))
+        parts.append("")
+
+        # Title — conversational
+        if venue and venue != "arXiv" and venue != "arxiv.org":
+            parts.append(f"A paper in {venue} titled: {title}.")
+        else:
+            parts.append(f"A new preprint titled: {title}.")
+        parts.append("")
+
+        # What they found — the key content
+        if summary:
+            parts.append(f"Here's what they found. {summary}")
+            parts.append("")
+
+        # Why you care — the connection
+        parts.append(f"Why this matters to you: this connects to {proj}.")
+        if len(matches) > 1:
+            other = _proj_friendly(matches[1][0])
+            parts.append(f"It's also relevant to {other}.")
+
+        # Rating — brief
+        parts.append(f"I'd rate this one {rating_desc}, {overall} out of 5 overall.")
+        parts.append("")
+
+    # --- Quick hits: next 5-8 papers ---
+    quick = scored[5:12]
+    if quick:
+        parts.append("Now, a few quick hits. These are worth knowing about but I'll keep them brief.")
+        parts.append("")
+
+        for p in quick:
+            title = p["title"]
+            matches = p.get("project_matches", [])
+            proj = _proj_friendly(matches[0][0]) if matches else "your work"
+            overall = p.get("rating_overall", 0)
+            summary = _summarize_for_speech(p.get("summary", ""))
+
+            parts.append(f"{title}.")
+            if summary:
+                # Just one sentence for quick hits
+                one_sentence = re.split(r'(?<=[.!?])\s+', summary)[0]
+                parts.append(one_sentence)
+            parts.append(f"Relevant to {proj}. Rated {overall} out of 5.")
+            parts.append("")
+
+    # How many more in written version
+    remaining = len(scored) - 12
+    if remaining > 0:
+        parts.append(f"There are {remaining} more papers in the written digest if you want to go deeper.")
+        parts.append("")
+
+    # --- GitHub repos ---
+    if repos:
+        parts.append("Switching gears to GitHub.")
+        parts.append("")
+        top_repos = repos[:3]
+        for r in top_repos:
+            name = r["name"].split("/")[-1].replace("-", " ")
+            desc = r["description"][:120] if r["description"] else ""
+            parts.append(f"{name}, with {r['stars']:,} stars. {desc}")
+        parts.append("")
+
+    # --- Closing synthesis ---
+    parts.append("So, stepping back, what's the big picture this week?")
+    parts.append("")
+    if hot:
+        if len(hot) >= 2:
+            parts.append(
+                f"The field is moving on two fronts that matter for you. "
+                f"First, {_proj_friendly(hot[0][0])}, where {hot[0][1]} papers appeared this week. "
+                f"And second, {_proj_friendly(hot[1][0])}, with {hot[1][1]} papers."
+            )
+        else:
+            parts.append(
+                f"Most of the action this week is around {_proj_friendly(hot[0][0])}, "
+                f"with {hot[0][1]} papers touching that area."
+            )
+    parts.append("")
+    parts.append("Check the written digest for links, ratings, and full summaries. That's all for this week. Talk to you next Sunday.")
 
     return "\n".join(parts)
 
