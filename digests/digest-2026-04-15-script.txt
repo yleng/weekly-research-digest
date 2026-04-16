@@ -1,95 +1,83 @@
-Hey Yan. Welcome to your weekly research digest, April 08 through April 15, 2026.
+Hey Yan. Welcome to your weekly research digest, covering April 08 through April 15, 2026.
 
-I found 14 papers from top venues this week.
-Most activity around your hypergraph interpretability paper and your visual evidence response paper for Nature Machine Intelligence.
+I found 37 papers relevant to your work this week.
+Let me walk you through the highlights.
 
-I'll do deep dives on the top five, then quick hits on a few more.
+Let's start with something interesting.
 
-Let's start with the most relevant paper this week.
+A paper titled: AI Governance through Markets.
 
-New preprint: AI Governance through Markets.
+Here's what they found. This paper argues that market governance mechanisms should be considered a key approach in the governance of artificial intelligence (AI), alongside traditional regulatory frameworks.
 
-This is an empirical paper.
-The key finding: While current governance approaches have predominantly focused on regulation, we contend that market-based mechanisms offer effective incentives for responsible AI development. We examine four emerging vectors of market governance: insurance, auditing, procurement, and due diligence, demonstrating how these mechanisms can affirm the relationship between AI risk and financial risk while addressing capital allocation inefficiencies.
+Why this matters: this connects to AI Governance PNAS.
+I'd rate this one solid, 3.1 out of 5.
 
-Why it matters for you: connects to your AI governance paper.
-Also touches your pricing bias paper.
+Next up.
 
-Rating: solid, 3.1 out of 5.
+A paper titled: KnowThyself: An Agentic Assistant for LLM Interpretability.
 
-Next.
+Here's what they found. We develop KnowThyself, an agentic assistant that advances large language model (LLM) interpretability. Existing tools provide useful insights but remain fragmented and code-intensive.
 
-From AAAI Conference on Artificial Intelligence: KnowThyself: An Agentic Assistant for LLM Interpretability.
+Why this matters: this connects to Visible Context Thresholds.
+I'd rate this one solid, 3.0 out of 5.
 
-This is a methods paper.
-The method contribution: We develop KnowThyself, an agentic assistant that advances large language model (LLM) interpretability.
+Here's another one worth noting.
 
-Why it matters for you: connects to your visible context thresholds paper for Nature Machine Intelligence.
-Also touches your visual evidence response paper for Nature Machine Intelligence.
+A paper titled: Game Theory to Study Cooperation in Human-Robot Mixed Groups: Exploring the Potential of the Public Good Game.
 
-Rating: solid, 3.0 out of 5.
+Here's what they found. In this study, we explore the potential of Game Theory as a means to investigate cooperation and trust in human-robot mixed groups. Particularly, we introduce the Public Good Game (PGG), a model highlighting the tension between individual self-interest and collective well-being.
 
-Third one.
+Why this matters: this connects to Cooperation PNAS.
+I'd rate this one moderate, 2.8 out of 5.
 
-New preprint: Reward Design for Physical Reasoning in Vision-Language Models.
+This next one is quite relevant.
 
-This is an empirical paper.
-The key finding: Yet even state-of-the-art Vision Language Models (VLMs) fall far short of human performance on physics benchmarks. While post-training algorithms such as Supervised Fine-Tuning (SFT) and Group Relative Policy Optimization (GRPO) have demonstrated strong reasoning gains in language models, how reward design shapes VLM physical reasoning behavior remains poorly
+A paper titled: Reward Design for Physical Reasoning in Vision-Language Models.
 
-Why it matters for you: connects to your visual evidence response paper for Nature Machine Intelligence.
+Here's what they found. Physical reasoning over visual inputs demands tight integration of visual perception, domain knowledge, and multi-step symbolic inference. Yet even state-of-the-art Vision Language Models (VLMs) fall far short of human performance on physics benchmarks.
 
-Rating: decent, 2.8 out of 5.
+Why this matters: this connects to Visual Evidence Response.
+I'd rate this one moderate, 2.8 out of 5.
 
-Here's another.
+Moving on.
 
-New preprint: HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System.
+A paper titled: HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System.
 
-This is a methods paper.
-The method contribution: To resolve this fundamental trade-off, we propose HiVLA, a visual-grounded-centric hierarchical framework that explicitly decouples high-level semantic planning from low-level motor control.
+Here's what they found. While end-to-end Vision-Language-Action (VLA) models offer a promising paradigm for robotic manipulation, fine-tuning them on narrow control data often compromises the profound reasoning capabilities inherited from their base Vision-Language Models (VLMs).
 
-Why it matters for you: connects to your visual evidence response paper for Nature Machine Intelligence.
-Also touches your visible context thresholds paper for Nature Machine Intelligence.
+Why this matters: this connects to Visual Evidence Response.
+I'd rate this one moderate, 2.8 out of 5.
 
-Rating: decent, 2.8 out of 5.
+Now, a few quick hits.
 
-And one more in the deep-dive section.
+Robustly Improving LLM Fairness in Realistic Settings via Interpretability.
+Large language models (LLMs) are increasingly deployed in high-stakes hiring applications, making decisions that directly impact people's careers and livelihoods.
+Relevant to Hypergraph Interpretability. Rated 2.7 out of 5.
 
-New preprint: Game Theory to Study Cooperation in Human-Robot Mixed Groups: Exploring the Potential of the Public Good Game.
+EXPLICATE: Enhancing Phishing Detection through Explainable AI and LLM-Powered Interpretability.
+Sophisticated phishing attacks have emerged as a major cybersecurity threat, becoming more common and difficult to prevent.
+Relevant to Hypergraph Interpretability. Rated 2.6 out of 5.
 
-This is an empirical paper.
-The key finding: Particularly, we introduce the Public Good Game (PGG), a model highlighting the tension between individual self-interest and collective well-being. In this work, we present a modified version of the PGG, where three human participants engage in the game with the humanoid robot iCub to assess whether various robot game strategies (e.g., always cooperate, always free ride, and tit-for-tat) can influence the participants'inclination to cooperate.
+Improving LLM Interpretability and Performance via Guided Embedding Refinement for Sequential Recommendation.
+The fast development of Large Language Models (LLMs) offers growing opportunities to further improve sequential recommendation systems.
+Relevant to Curation Divergence. Rated 2.4 out of 5.
 
-Why it matters for you: connects to your cooperation on networks paper.
-Also touches your influence steering paper for ICML.
+LLM Interpretability with Identifiable Temporal-Instantaneous Representation.
+Despite Large Language Models'remarkable capabilities, understanding their internal representations remains challenging.
+Relevant to Structural Targeting. Rated 2.4 out of 5.
 
-Rating: decent, 2.8 out of 5.
+Response Uncertainty and Probe Modeling: Two Sides of the Same Coin in LLM Interpretability?.
+Probing techniques have shown promise in revealing how LLMs encode human-interpretable concepts, particularly when applied to curated datasets.
+Relevant to Provenance Preference. Rated 2.4 out of 5.
 
-Quick hits section. Five more papers, brief take on each.
+eDIF: A European Deep Inference Fabric for Remote Interpretability of LLM.
+This paper presents a feasibility study on the deployment of a European Deep Inference Fabric (eDIF), an NDIF-compatible infrastructure designed to support mechanistic interpretability research on large language models.
+Relevant to Cooperation PNAS. Rated 2.4 out of 5.
 
-Robustly Improving LLM Fairness in Realistic Settings via Interpretability. Empirical.
-While prior studies suggest simple anti-bias prompts can eliminate demographic biases in controlled evaluations, we find these mitigations fail when realistic contextual details are introduced.
-Connects to your hypergraph interpretability paper. decent, 2.7 out of 5.
+Correct Prediction, Wrong Steps? Consensus Reasoning Knowledge Graph for Robust Chain-of-Thought Synthesis.
+LLM reasoning traces suffer from complex flaws -- *Step Internal Flaws* (logical errors, hallucinations, etc.) and *Step-wise Flaws* (overthinking, underthinking), which vary by sample.
+Relevant to Adaptive Monoculture. Rated 2.4 out of 5.
 
-EXPLICATE: Enhancing Phishing Detection through Explainable AI and LLM-Powered Interpretability. Methods.
-Though machine learning techniques have shown promise in detecting phishing attacks, they function mainly as"black boxes"without revealing their decision-making rationale. This lack of transparency er
-Connects to your hypergraph interpretability paper. decent, 2.6 out of 5.
+There are 25 more papers in the written digest.
 
-Physics-Informed Neural Networks for Methane Sorption: Cross-Gas Transfer Learning, Ensemble Collapse Under Physics Constraints, and Monte Carlo Dropout Uncertainty Quantification. Empirical.
-We present a physics-informed transfer learning framework that adapts a hydrogen sorption PINN to methane sorption prediction via Elastic Weight Consolidation, coal-specific feature engineering, an
-Connects to your Net DPO paper for Management Science. marginal, 2.4 out of 5.
-
-UMI-3D: Extending Universal Manipulation Interface from Vision-Limited to 3D Spatial Perception. Empirical.
-While UMI enables portable, wrist-mounted data acquisition, its reliance on monocular visual SLAM makes it vulnerable to occlusions, dynamic scenes, and tracking failures, limiting its applicability i
-Connects to your visual evidence response paper for Nature Machine Intelligence. marginal, 2.4 out of 5.
-
-Improving LLM Interpretability and Performance via Guided Embedding Refinement for Sequential Recommendation. Methods.
-To partly alleviate challenges from these questions, we propose guided embedding refinement, a method that carries out a guided and interpretable usage of LLM to enhance the embeddings associated with
-Connects to your curation divergence paper. marginal, 2.4 out of 5.
-
-4 more papers in the written digest.
-
-Big picture for the week.
-
-Two active fronts: your hypergraph interpretability paper with 5 papers, and your visual evidence response paper for Nature Machine Intelligence with 4 papers.
-
-Full details and links in the written digest. See you next Sunday.
+Check the written digest for links and full details. That's all for this week. Talk to you next Sunday.
