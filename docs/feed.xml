@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yan Leng — Weekly Research Digest</title>
+    <link>https://github.com/yleng/weekly-research-digest</link>
+    <atom:link href="https://yleng.github.io/weekly-research-digest/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Weekly AI-curated digest of new papers and GitHub repos relevant to network science, LLM interpretability, human-AI decision making, causal inference, and computational social science.</description>
+    <language>en-us</language>
+    <itunes:author>Yan Leng Research Digest</itunes:author>
+    <itunes:summary>Weekly paper digest covering PNAS, Nature, Science, NeurIPS, ICML, Management Science, and more. Each episode summarizes top papers with ratings and connections to active research projects.</itunes:summary>
+    <itunes:category text="Science"/>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:image href="https://yleng.github.io/weekly-research-digest/cover.png"/>
+
+    <item>
+      <title>Week of Apr 8–15, 2026 — 53 papers, top: network science + causal inference</title>
+      <description>This week: 53 relevant papers found. Top picks include network science methods for village preservation, causal inference with machine learning for treatment effects, deep learning for mental health discourse analysis, and an agentic assistant for LLM interpretability. Projects with most activity: Net DPO, Adaptive Monoculture, AI Governance.</description>
+      <pubDate>Tue, 15 Apr 2026 09:00:00 -0500</pubDate>
+      <enclosure url="https://github.com/yleng/weekly-research-digest/releases/download/v2026-04-15/digest-2026-04-15.mp3" length="2700000" type="audio/mpeg"/>
+      <guid isPermaLink="false">digest-2026-04-15</guid>
+      <itunes:duration>300</itunes:duration>
+      <itunes:summary>53 papers across PNAS, Nature, arXiv and more. Top rated: network science for cultural preservation, causal ML for treatment effects, LLM interpretability tools.</itunes:summary>
+    </item>
+
+  </channel>
+</rss>

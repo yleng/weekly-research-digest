@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1400" viewBox="0 0 1400 1400">
+  <rect width="1400" height="1400" fill="#1a1a2e"/>
+  <rect x="50" y="50" width="1300" height="1300" rx="40" fill="#16213e"/>
+  <text x="700" y="500" font-family="Georgia, serif" font-size="120" fill="#e94560" text-anchor="middle" font-weight="bold">Weekly</text>
+  <text x="700" y="650" font-family="Georgia, serif" font-size="120" fill="#e94560" text-anchor="middle" font-weight="bold">Research</text>
+  <text x="700" y="800" font-family="Georgia, serif" font-size="120" fill="#e94560" text-anchor="middle" font-weight="bold">Digest</text>
+  <text x="700" y="980" font-family="Arial, sans-serif" font-size="50" fill="#a8a8a8" text-anchor="middle">Networks | LLMs | Causal Inference</text>
+  <text x="700" y="1060" font-family="Arial, sans-serif" font-size="40" fill="#666666" text-anchor="middle">Yan Leng</text>
+</svg>
