@@ -16,13 +16,13 @@
     <itunes:image href="https://yleng.github.io/weekly-research-digest/cover.png"/>
 
     <item>
-      <title>Week of Apr 8–15, 2026 — 53 papers, top: network science + causal inference</title>
-      <description>This week: 53 relevant papers found. Top picks include network science methods for village preservation, causal inference with machine learning for treatment effects, deep learning for mental health discourse analysis, and an agentic assistant for LLM interpretability. Projects with most activity: Net DPO, Adaptive Monoculture, AI Governance.</description>
-      <pubDate>Tue, 15 Apr 2026 09:00:00 -0500</pubDate>
-      <enclosure url="https://github.com/yleng/weekly-research-digest/releases/download/v2026-04-15/digest-2026-04-15.mp3" length="2700000" type="audio/mpeg"/>
-      <guid isPermaLink="false">digest-2026-04-15</guid>
+      <title>Apr 15: Prompt Sensitivity, Collective LLM Behavior, Causal ML</title>
+      <description>Hey Yan — 38 papers this week. Top picks: benchmarking prompt sensitivity (connects to your Management Science paper), visual preference optimization via DPO, and a framework for validating collective behavior in LLM societies. Deep dives on the top 5, quick hits on 7 more, plus GitHub trending repos.</description>
+      <pubDate>Tue, 15 Apr 2026 12:00:00 -0500</pubDate>
+      <enclosure url="https://github.com/yleng/weekly-research-digest/releases/download/v2026-04-15/digest-2026-04-15.mp3" length="2600000" type="audio/mpeg"/>
+      <guid isPermaLink="false">digest-2026-04-15-v2</guid>
       <itunes:duration>300</itunes:duration>
-      <itunes:summary>53 papers across PNAS, Nature, arXiv and more. Top rated: network science for cultural preservation, causal ML for treatment effects, LLM interpretability tools.</itunes:summary>
+      <itunes:summary>Conversational walkthrough: 5 deep dives + 7 quick hits. Prompt sensitivity, visual DPO, collective LLM behavior, causal ML for treatment effects, and LLM interpretability tools.</itunes:summary>
     </item>
 
   </channel>
