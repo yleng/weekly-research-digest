@@ -1,0 +1,231 @@
+name: Generate Podcast Episode
+
+on:
+  push:
+    paths:
+      - 'digests/digest-*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  podcast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Find new digest file
+        id: find
+        run: |
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'digests/digest-*.md' | grep -v curated | head -1)
+          if [ -z "$FILE" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "file=$FILE" >> $GITHUB_OUTPUT
+            echo "found=true" >> $GITHUB_OUTPUT
+            DATE=$(echo "$FILE" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}')
+            echo "date=$DATE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install edge-tts
+        if: steps.find.outputs.found == 'true'
+        run: pip install edge-tts
+
+      - name: Generate audio and update feed
+        if: steps.find.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_DATE: ${{ steps.find.outputs.date }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, re, asyncio, subprocess
+          from pathlib import Path
+          from datetime import datetime, timedelta
+
+          date = os.environ["DIGEST_DATE"]
+          config = json.loads(Path("config.json").read_text())
+
+          # --- Load digest and score papers (lightweight re-scoring) ---
+          # We just need the speech script, so read the markdown and build a simple script
+          digest_md = Path(f"digests/digest-{date}.md").read_text()
+
+          # Extract paper titles and summaries from markdown for speech
+          # Parse ### [Title](url) pattern and **Summary:** blocks
+          papers = []
+          current = {}
+          for line in digest_md.split("\n"):
+              title_match = re.match(r"### \[(.+?)\]\((.+?)\)", line)
+              if title_match:
+                  if current:
+                      papers.append(current)
+                  current = {"title": title_match.group(1), "url": title_match.group(2)}
+              elif line.startswith("### "):
+                  if current:
+                      papers.append(current)
+                  current = {"title": line.replace("### ", "").strip()}
+              elif line.startswith("**Summary:**"):
+                  current["summary"] = line.replace("**Summary:**", "").strip()
+              elif "What you can learn" in line:
+                  # Extract project name
+                  proj_match = re.search(r"→ (.+?):", line)
+                  if proj_match:
+                      current["project"] = proj_match.group(1).strip()
+              elif line.startswith("Quality"):
+                  overall_match = re.search(r"Overall \*\*(.+?)/5\*\*", line)
+                  if overall_match:
+                      current["rating"] = float(overall_match.group(1))
+
+          if current:
+              papers.append(current)
+
+          # Sort by rating
+          papers.sort(key=lambda x: x.get("rating", 0), reverse=True)
+
+          # --- Build conversational speech script ---
+          dt = datetime.strptime(date, "%Y-%m-%d")
+          week_start = (dt - timedelta(days=7)).strftime("%B %d")
+          week_end = dt.strftime("%B %d, %Y")
+
+          transitions = [
+              "Let's start with something interesting.",
+              "Next up.",
+              "Here's another one worth noting.",
+              "This next one is quite relevant.",
+              "Moving on.",
+          ]
+
+          def rating_word(r):
+              if r >= 4.0: return "very strong"
+              if r >= 3.5: return "strong"
+              if r >= 3.0: return "solid"
+              if r >= 2.5: return "moderate"
+              return "worth a look"
+
+          def friendly_proj(name):
+              name = name.split(",")[0].strip()
+              return name.replace("_", " ")
+
+          parts = []
+          parts.append(f"Hey Yan. Welcome to your weekly research digest, covering {week_start} through {week_end}.")
+          parts.append("")
+          parts.append(f"I found {len(papers)} papers relevant to your work this week.")
+          parts.append("Let me walk you through the highlights.")
+          parts.append("")
+
+          # Top 5 deep dives
+          for i, p in enumerate(papers[:5]):
+              parts.append(transitions[i % len(transitions)])
+              parts.append("")
+              parts.append(f"A paper titled: {p['title']}.")
+              parts.append("")
+              if p.get("summary"):
+                  sentences = re.split(r'(?<=[.!?])\s+', p["summary"])
+                  short = " ".join(sentences[:2])
+                  if len(short) > 350:
+                      short = sentences[0]
+                  parts.append(f"Here's what they found. {short}")
+                  parts.append("")
+              proj = friendly_proj(p.get("project", "your research"))
+              parts.append(f"Why this matters: this connects to {proj}.")
+              r = p.get("rating", 0)
+              parts.append(f"I'd rate this one {rating_word(r)}, {r} out of 5.")
+              parts.append("")
+
+          # Quick hits
+          quick = papers[5:12]
+          if quick:
+              parts.append("Now, a few quick hits.")
+              parts.append("")
+              for p in quick:
+                  parts.append(f"{p['title']}.")
+                  if p.get("summary"):
+                      one = re.split(r'(?<=[.!?])\s+', p["summary"])[0]
+                      parts.append(one)
+                  proj = friendly_proj(p.get("project", "your work"))
+                  r = p.get("rating", 0)
+                  parts.append(f"Relevant to {proj}. Rated {r} out of 5.")
+                  parts.append("")
+
+          remaining = len(papers) - 12
+          if remaining > 0:
+              parts.append(f"There are {remaining} more papers in the written digest.")
+              parts.append("")
+
+          parts.append("Check the written digest for links and full details. That's all for this week. Talk to you next Sunday.")
+
+          speech = "\n".join(parts)
+
+          # Save script
+          Path(f"digests/digest-{date}-script.txt").write_text(speech)
+
+          # --- Generate audio ---
+          import edge_tts
+          mp3_path = f"digests/digest-{date}.mp3"
+
+          async def gen():
+              comm = edge_tts.Communicate(speech, "en-US-AriaNeural", rate="+10%")
+              await comm.save(mp3_path)
+
+          asyncio.run(gen())
+          mp3_size = os.path.getsize(mp3_path)
+          duration = max(60, mp3_size // 16000)
+          print(f"Audio generated: {mp3_path} ({mp3_size} bytes, ~{duration}s)")
+
+          # --- Upload as GitHub Release ---
+          tag = f"v{date}"
+          subprocess.run(["gh", "release", "create", tag, "--title", f"Weekly Digest {date}",
+                          "--notes", f"Audio digest for week of {date}", mp3_path],
+                         capture_output=True, text=True)
+          # If release exists, just upload
+          subprocess.run(["gh", "release", "upload", tag, mp3_path, "--clobber"],
+                         capture_output=True, text=True)
+
+          mp3_url = f"https://github.com/yleng/weekly-research-digest/releases/download/{tag}/digest-{date}.mp3"
+          print(f"Release URL: {mp3_url}")
+
+          # --- Update RSS feed ---
+          feed_path = Path("docs/feed.xml")
+          feed = feed_path.read_text()
+
+          guid = f"digest-{date}"
+          if guid in feed:
+              print("Episode already in feed")
+          else:
+              pub_date = dt.strftime("%a, %d %b %Y 09:00:00 -0500")
+              start = (dt - timedelta(days=7)).strftime("%b %d")
+              end = dt.strftime("%b %d, %Y")
+
+              new_item = f"""
+              <item>
+                <title>Week of {start} to {end}</title>
+                <description>{len(papers)} papers relevant to your research this week.</description>
+                <pubDate>{pub_date}</pubDate>
+                <enclosure url="{mp3_url}" length="{mp3_size}" type="audio/mpeg"/>
+                <guid isPermaLink="false">{guid}</guid>
+                <itunes:duration>{duration}</itunes:duration>
+                <itunes:summary>{len(papers)} papers from PNAS, Nature, arXiv, and more.</itunes:summary>
+              </item>
+          """
+              insert_pos = feed.find("<item>")
+              if insert_pos == -1:
+                  insert_pos = feed.find("</channel>")
+              feed = feed[:insert_pos] + new_item + feed[insert_pos:]
+              feed_path.write_text(feed)
+              print("Feed updated")
+
+          # --- Commit feed update ---
+          subprocess.run(["git", "config", "user.name", "github-actions"], capture_output=True)
+          subprocess.run(["git", "config", "user.email", "actions@github.com"], capture_output=True)
+          subprocess.run(["git", "add", "docs/feed.xml", f"digests/digest-{date}-script.txt"], capture_output=True)
+          result = subprocess.run(["git", "commit", "-m", f"Update podcast feed for {date}"],
+                                  capture_output=True, text=True)
+          if result.returncode == 0:
+              subprocess.run(["git", "push"], capture_output=True, text=True)
+              print("Feed committed and pushed")
+          else:
+              print("No feed changes to commit")
+          PYEOF
