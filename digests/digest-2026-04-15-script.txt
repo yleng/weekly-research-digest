@@ -1,92 +1,95 @@
-Hey Yan. Welcome to your weekly research digest, covering April 08 through April 15, 2026.
+Hey Yan. Welcome to your weekly research digest, April 08 through April 15, 2026.
 
-I scanned the latest publications and found 38 papers relevant to your work.
-The biggest clusters this week are around your Net DPO paper for Management Science, your visible context thresholds paper for Nature Machine Intelligence.
+I found 14 papers from top venues this week.
+Most activity around your hypergraph interpretability paper and your visual evidence response paper for Nature Machine Intelligence.
 
-Let me walk you through the highlights.
+I'll do deep dives on the top five, then quick hits on a few more.
 
-Let's start with something interesting.
+Let's start with the most relevant paper this week.
 
-A paper in European Conference on Information Retrieval titled: Benchmarking Prompt Sensitivity in Large Language Models.
+New preprint: AI Governance through Markets.
 
-Here's what they found. Large language Models (LLMs) are highly sensitive to variations in prompt formulation, which can significantly impact their ability to generate accurate responses. In this paper, we introduce a new task, Prompt Sensitivity Prediction, and a dataset PromptSET designed to investigate the effects of slight prompt variations on LLM performance.
+This is an empirical paper.
+The key finding: While current governance approaches have predominantly focused on regulation, we contend that market-based mechanisms offer effective incentives for responsible AI development. We examine four emerging vectors of market governance: insurance, auditing, procurement, and due diligence, demonstrating how these mechanisms can affirm the relationship between AI risk and financial risk while addressing capital allocation inefficiencies.
 
-Why this matters to you: this connects to your prompt variations paper for Management Science.
-I'd rate this one solid, 3.0 out of 5 overall.
+Why it matters for you: connects to your AI governance paper.
+Also touches your pricing bias paper.
 
-Next up.
+Rating: solid, 3.1 out of 5.
 
-A new preprint titled: SceneCritic: A Symbolic Evaluator for 3D Indoor Scene Synthesis.
+Next.
 
-Here's what they found. Large Language Models (LLMs) and Vision-Language Models (VLMs) increasingly generate indoor scenes through intermediate structures such as layouts and scene graphs, yet evaluation still relies on LLM or VLM judges that score rendered views, making judgments sensitive to viewpoint, prompt phrasing, and hallucination.
+From AAAI Conference on Artificial Intelligence: KnowThyself: An Agentic Assistant for LLM Interpretability.
 
-Why this matters to you: this connects to your visual evidence response paper for Nature Machine Intelligence.
-I'd rate this one moderate, 2.8 out of 5 overall.
+This is a methods paper.
+The method contribution: We develop KnowThyself, an agentic assistant that advances large language model (LLM) interpretability.
 
-Here's another one worth noting.
+Why it matters for you: connects to your visible context thresholds paper for Nature Machine Intelligence.
+Also touches your visual evidence response paper for Nature Machine Intelligence.
 
-A new preprint titled: Visual Preference Optimization with Rubric Rewards.
+Rating: solid, 3.0 out of 5.
 
-Here's what they found. The effectiveness of Direct Preference Optimization (DPO) depends on preference data that reflect the quality differences that matter in multimodal tasks. Existing pipelines often rely on off-policy perturbations or coarse outcome-based signals, which are not well suited to fine-grained visual reasoning.
+Third one.
 
-Why this matters to you: this connects to your Net DPO paper for Management Science.
-It's also relevant to your visual evidence response paper for Nature Machine Intelligence.
-I'd rate this one moderate, 2.8 out of 5 overall.
+New preprint: Reward Design for Physical Reasoning in Vision-Language Models.
 
-This next one is quite relevant.
+This is an empirical paper.
+The key finding: Yet even state-of-the-art Vision Language Models (VLMs) fall far short of human performance on physics benchmarks. While post-training algorithms such as Supervised Fine-Tuning (SFT) and Group Relative Policy Optimization (GRPO) have demonstrated strong reasoning gains in language models, how reward design shapes VLM physical reasoning behavior remains poorly
 
-A paper in arXiv.org titled: Radio Astronomy in the Era of Vision-Language Models: Prompt Sensitivity and Adaptation.
+Why it matters for you: connects to your visual evidence response paper for Nature Machine Intelligence.
 
-Here's what they found. Vision-Language Models (VLMs), such as recent Qwen and Gemini models, are positioned as general-purpose AI systems capable of reasoning across domains. Yet their capabilities in scientific imaging, especially on unfamiliar and potentially previously unseen data distributions, remain poorly understood.
+Rating: decent, 2.8 out of 5.
 
-Why this matters to you: this connects to your visual evidence response paper for Nature Machine Intelligence.
-It's also relevant to your prompt variations paper for Management Science.
-I'd rate this one moderate, 2.8 out of 5 overall.
+Here's another.
 
-Moving on.
+New preprint: HiVLA: A Visual-Grounded-Centric Hierarchical Embodied Manipulation System.
 
-A paper in arXiv.org titled: The PIMMUR Principles: Ensuring Validity in Collective Behavior of LLM Societies.
+This is a methods paper.
+The method contribution: To resolve this fundamental trade-off, we propose HiVLA, a visual-grounded-centric hierarchical framework that explicitly decouples high-level semantic planning from low-level motor control.
 
-Here's what they found. Large language models (LLMs) are increasingly deployed to simulate human collective behaviors, yet the methodological rigor of these"AI societies"remains under-explored. Through a systematic audit of 39 recent studies, we identify six pervasive flaws-spanning agent profiles, interaction, memory, control, unawareness, and realism (PIMMUR).
+Why it matters for you: connects to your visual evidence response paper for Nature Machine Intelligence.
+Also touches your visible context thresholds paper for Nature Machine Intelligence.
 
-Why this matters to you: this connects to your visible context thresholds paper for Nature Machine Intelligence.
-It's also relevant to your pricing bias paper.
-I'd rate this one moderate, 2.7 out of 5 overall.
+Rating: decent, 2.8 out of 5.
 
-Now, a few quick hits. These are worth knowing about but I'll keep them brief.
+And one more in the deep-dive section.
 
-Understanding collective behavior in biological systems through potential field mechanisms.
-Collective behavior in biological systems emerges from local interactions among individuals, enabling groups to adapt to dynamic environments.
-Relevant to your influence steering paper for ICML. Rated 2.6 out of 5.
+New preprint: Game Theory to Study Cooperation in Human-Robot Mixed Groups: Exploring the Potential of the Public Good Game.
 
-A Human-AI Comparative Analysis of Prompt Sensitivity in LLM-Based Relevance Judgment.
-Large Language Models (LLMs) are increasingly used to automate relevance judgments for information retrieval (IR) tasks, often demonstrating agreement with human labels that approaches inter-human agreement.
-Relevant to your prompt variations paper for Management Science. Rated 2.6 out of 5.
+This is an empirical paper.
+The key finding: Particularly, we introduce the Public Good Game (PGG), a model highlighting the tension between individual self-interest and collective well-being. In this work, we present a modified version of the PGG, where three human participants engage in the game with the humanoid robot iCub to assess whether various robot game strategies (e.g., always cooperate, always free ride, and tit-for-tat) can influence the participants'inclination to cooperate.
 
-Parallax: Why AI Agents That Think Must Never Act.
-Autonomous AI agents are rapidly transitioning from experimental tools to operational infrastructure, with projections that 80% of enterprise applications will embed AI copilots by the end of 2026.
-Relevant to your Net DPO paper for Management Science. Rated 2.4 out of 5.
+Why it matters for you: connects to your cooperation on networks paper.
+Also touches your influence steering paper for ICML.
 
-Cycle-Consistent Search: Question Reconstructability as a Proxy Reward for Search Agent Training.
-Reinforcement Learning (RL) has shown strong potential for optimizing search agents in complex information retrieval tasks.
-Relevant to your Net DPO paper for Management Science. Rated 2.4 out of 5.
+Rating: decent, 2.8 out of 5.
 
-The Verification Tax: Fundamental Limits of AI Auditing in the Rare-Error Regime.
-The most cited calibration result in deep learning -- post-temperature-scaling ECE of 0.012 on CIFAR-100 (Guo et al., 2017) -- is below the statistical noise floor.
-Relevant to your LLM measurements paper. Rated 2.4 out of 5.
+Quick hits section. Five more papers, brief take on each.
 
-From edges to meaning: Semantic line sketches as a cognitive scaffold for ancient pictograph invention.
-Humans readily recognize objects from sparse line drawings, a capacity that appears early in development and persists across cultures, suggesting neural rather than purely learned origins.
-Relevant to your causal abstraction paper for NeurIPS. Rated 2.4 out of 5.
+Robustly Improving LLM Fairness in Realistic Settings via Interpretability. Empirical.
+While prior studies suggest simple anti-bias prompts can eliminate demographic biases in controlled evaluations, we find these mitigations fail when realistic contextual details are introduced.
+Connects to your hypergraph interpretability paper. decent, 2.7 out of 5.
 
-RePAIR: Interactive Machine Unlearning through Prompt-Aware Model Repair.
-Large language models (LLMs) inherently absorb harmful knowledge, misinformation, and personal data during pretraining on large-scale web corpora, with no native mechanism for selective removal.
-Relevant to your cooperation on networks paper. Rated 2.4 out of 5.
+EXPLICATE: Enhancing Phishing Detection through Explainable AI and LLM-Powered Interpretability. Methods.
+Though machine learning techniques have shown promise in detecting phishing attacks, they function mainly as"black boxes"without revealing their decision-making rationale. This lack of transparency er
+Connects to your hypergraph interpretability paper. decent, 2.6 out of 5.
 
-There are 26 more papers in the written digest if you want to go deeper.
+Physics-Informed Neural Networks for Methane Sorption: Cross-Gas Transfer Learning, Ensemble Collapse Under Physics Constraints, and Monte Carlo Dropout Uncertainty Quantification. Empirical.
+We present a physics-informed transfer learning framework that adapts a hydrogen sorption PINN to methane sorption prediction via Elastic Weight Consolidation, coal-specific feature engineering, an
+Connects to your Net DPO paper for Management Science. marginal, 2.4 out of 5.
 
-So, stepping back, what's the big picture this week?
+UMI-3D: Extending Universal Manipulation Interface from Vision-Limited to 3D Spatial Perception. Empirical.
+While UMI enables portable, wrist-mounted data acquisition, its reliance on monocular visual SLAM makes it vulnerable to occlusions, dynamic scenes, and tracking failures, limiting its applicability i
+Connects to your visual evidence response paper for Nature Machine Intelligence. marginal, 2.4 out of 5.
 
-The field is moving on two fronts that matter for you. First, your Net DPO paper for Management Science, where 11 papers appeared this week. And second, your visible context thresholds paper for Nature Machine Intelligence, with 10 papers.
+Improving LLM Interpretability and Performance via Guided Embedding Refinement for Sequential Recommendation. Methods.
+To partly alleviate challenges from these questions, we propose guided embedding refinement, a method that carries out a guided and interpretable usage of LLM to enhance the embeddings associated with
+Connects to your curation divergence paper. marginal, 2.4 out of 5.
 
-Check the written digest for links, ratings, and full summaries. That's all for this week. Talk to you next Sunday.
+4 more papers in the written digest.
+
+Big picture for the week.
+
+Two active fronts: your hypergraph interpretability paper with 5 papers, and your visual evidence response paper for Nature Machine Intelligence with 4 papers.
+
+Full details and links in the written digest. See you next Sunday.

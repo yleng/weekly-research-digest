@@ -127,6 +127,98 @@ def search_arxiv(query: str, categories: list[str], max_results: int = 30,
     return papers
 
 # ---------------------------------------------------------------------------
+# Venue whitelist — ONLY papers from these venues are included
+# ---------------------------------------------------------------------------
+
+# Exact venue patterns — must match precisely (not substring of junk journals)
+VENUE_WHITELIST_EXACT = {
+    # General science
+    "pnas", "proceedings of the national academy of sciences",
+    "nature communications", "nature human behaviour",
+    "nature machine intelligence", "science advances",
+    # Management / IS / Marketing
+    "management science", "marketing science",
+    "information systems research", "mis quarterly",
+    "journal of marketing research",
+    "manufacturing & service operations management",
+    "operations research",
+    # ML conferences
+    "neurips", "nips",
+    "international conference on machine learning",
+    "international conference on learning representations",
+    "aaai conference on artificial intelligence",
+    "annual meeting of the association for computational linguistics",
+    "conference on empirical methods in natural language processing",
+    "aistats", "uai",
+    "ieee/cvf conference on computer vision",
+    # Econ / social science
+    "econometrica", "american economic review",
+    "quarterly journal of economics",
+    "review of economic studies", "journal of political economy",
+    "american journal of sociology", "american sociological review",
+    # Comp social science
+    "the web conference", "kdd",
+    "acm international conference on web search and data mining",
+    "icwsm",
+}
+
+# Patterns that must appear as the FULL venue name (not a substring)
+# Use startswith for Nature/Science to catch "Nature" but not "Nature Reviews Foo"
+VENUE_PREFIX_RULES = [
+    ("nature", ["nature communications", "nature human behaviour",
+                "nature machine intelligence", "nature neuroscience",
+                "nature methods", "nature physics"]),
+    ("science", ["science advances", "science robotics"]),
+]
+
+
+def _is_good_venue(venue_str: str) -> bool:
+    """Strict venue check. No substring matching of 'science' or 'nature'."""
+    if not venue_str:
+        return False
+    v = venue_str.lower().strip()
+
+    # Exact match against whitelist
+    if v in VENUE_WHITELIST_EXACT:
+        return True
+
+    # Check if any whitelist entry is a substring of the venue
+    # (but only for specific long patterns, not short words)
+    for wl in VENUE_WHITELIST_EXACT:
+        if len(wl) >= 10 and wl in v:  # only match long patterns as substrings
+            return True
+
+    # Special handling for Nature and Science (exact journal, not random journals with "nature" in name)
+    if v == "nature" or v == "science":
+        return True
+    for prefix, allowed_subs in VENUE_PREFIX_RULES:
+        if v.startswith(prefix):
+            return any(sub in v for sub in allowed_subs)
+
+    # ICML / ICLR / NeurIPS short forms
+    if any(tag in v for tag in ["icml", "iclr", "neurips", "nips", "aaai", "emnlp",
+                                 "naacl", "aistats", "cvpr", "eccv", "iccv",
+                                 "kdd", "wsdm", "icwsm", "acl 2"]):
+        return True
+
+    # arXiv handled separately
+    if "arxiv" in v:
+        return True
+
+    return False
+
+
+def _is_high_quality_arxiv(paper: dict) -> bool:
+    """For arXiv papers, require either high relevance score or citations."""
+    citations = paper.get("citations", 0) or 0
+    # Recent arXiv with >5 citations is notable
+    if citations >= 5:
+        return True
+    # Otherwise, require strong keyword match (score >= 2)
+    return paper.get("top_score", 0) >= 2.0
+
+
+# ---------------------------------------------------------------------------
 # Semantic Scholar search
 # ---------------------------------------------------------------------------
 
@@ -149,17 +241,21 @@ def search_semantic_scholar(query: str, max_results: int = 10,
     for p in data["data"]:
         if not p.get("title"):
             continue
+        venue = p.get("venue", "")
+        # STRICT FILTER: only keep papers from whitelisted venues
+        if not _is_good_venue(venue):
+            continue
         authors = [a.get("name", "") for a in (p.get("authors") or [])[:5]]
         doi = (p.get("externalIds") or {}).get("DOI", "")
         papers.append({
             "source": "Semantic Scholar",
             "title": p["title"],
             "authors": authors,
-            "venue": p.get("venue", ""),
+            "venue": venue,
             "year": p.get("year", ""),
             "date": p.get("publicationDate", ""),
             "citations": p.get("citationCount", 0),
-            "summary": (p.get("abstract") or "")[:500],
+            "summary": (p.get("abstract") or "")[:800],  # longer for better analysis
             "url": p.get("url", ""),
             "doi": doi,
         })
@@ -523,73 +619,126 @@ def _proj_friendly(name: str) -> str:
     return friendly.get(name, name.replace("_", " "))
 
 
-def _summarize_for_speech(summary: str) -> str:
-    """Extract first 2 clean sentences from abstract for spoken delivery."""
+def _classify_paper(summary: str) -> str:
+    """Classify paper as 'empirical', 'method', or 'theory' from abstract."""
+    s = summary.lower()
+    method_signals = ["we propose", "we introduce", "we develop", "our method",
+                      "our approach", "our framework", "our algorithm", "novel method",
+                      "new method", "technique", "architecture", "we design"]
+    empirical_signals = ["we find", "we show", "our results", "experiment",
+                         "dataset", "we conduct", "randomized", "field study",
+                         "observational", "regression", "treatment effect",
+                         "we estimate", "causal", "evidence", "we measure",
+                         "survey", "participants", "subjects"]
+    theory_signals = ["we prove", "theorem", "proposition", "we derive",
+                      "equilibrium", "we model", "formal model", "we characterize"]
+
+    method_score = sum(1 for sig in method_signals if sig in s)
+    empirical_score = sum(1 for sig in empirical_signals if sig in s)
+    theory_score = sum(1 for sig in theory_signals if sig in s)
+
+    if theory_score > method_score and theory_score > empirical_score:
+        return "theory"
+    if method_score > empirical_score:
+        return "method"
+    return "empirical"
+
+
+def _extract_contribution(summary: str, paper_type: str) -> str:
+    """Extract the key contribution from abstract based on paper type."""
     if not summary:
         return ""
-    # Clean up artifacts
     text = re.sub(r'\s+', ' ', summary).strip()
     sentences = re.split(r'(?<=[.!?])\s+', text)
-    result = " ".join(sentences[:2])
-    # Limit length for listening
-    if len(result) > 350:
-        result = " ".join(sentences[:1])
-    return result
+
+    if paper_type == "empirical":
+        # Look for findings sentences
+        for s in sentences:
+            sl = s.lower()
+            if any(w in sl for w in ["we find", "we show", "results show",
+                                      "our results", "evidence", "we demonstrate"]):
+                return s
+        # Look for identification / method
+        for s in sentences:
+            sl = s.lower()
+            if any(w in sl for w in ["using", "we exploit", "we leverage",
+                                      "instrumental", "difference-in-difference",
+                                      "regression discontinuity", "natural experiment"]):
+                return s
+    elif paper_type == "method":
+        # Look for method contribution
+        for s in sentences:
+            sl = s.lower()
+            if any(w in sl for w in ["we propose", "we introduce", "we develop",
+                                      "our method", "our approach", "outperforms",
+                                      "achieves", "state-of-the-art"]):
+                return s
+    elif paper_type == "theory":
+        for s in sentences:
+            sl = s.lower()
+            if any(w in sl for w in ["we prove", "we show", "we derive",
+                                      "we characterize", "equilibrium"]):
+                return s
+
+    # Fallback: skip the throat-clearing first sentence, use second
+    if len(sentences) >= 3:
+        return sentences[1] + " " + sentences[2]
+    if len(sentences) >= 2:
+        return sentences[1]
+    return sentences[0] if sentences else ""
 
 
 def _transition(i: int) -> str:
     """Conversational transition phrases between papers."""
     phrases = [
-        "Let's start with something interesting.",
-        "Next up.",
-        "Here's another one worth noting.",
-        "This next one is quite relevant.",
-        "Moving on.",
-        "Here's something a bit different.",
-        "Now, this one caught my attention.",
-        "And another.",
+        "Let's start with the most relevant paper this week.",
+        "Next.",
+        "Third one.",
+        "Here's another.",
+        "And one more in the deep-dive section.",
     ]
     return phrases[i % len(phrases)]
 
 
 def _rating_word(score: float) -> str:
-    """Convert numeric rating to spoken description."""
-    if score >= 4.0:
-        return "very strong"
-    if score >= 3.5:
-        return "strong"
-    if score >= 3.0:
-        return "solid"
-    if score >= 2.5:
-        return "moderate"
-    return "worth a look"
+    if score >= 4.0: return "very strong"
+    if score >= 3.5: return "strong"
+    if score >= 3.0: return "solid"
+    if score >= 2.5: return "decent"
+    return "marginal"
+
+
+def _paper_type_label(ptype: str) -> str:
+    return {"empirical": "This is an empirical paper.",
+            "method": "This is a methods paper.",
+            "theory": "This is a theory paper."}.get(ptype, "")
 
 
 def digest_to_speech_text(scored: list[dict], repos: list[dict],
                           digest_date: str, days_back: int) -> str:
-    """Convert digest data into a conversational podcast script."""
+    """Convert digest data into a conversational podcast with real analysis."""
     week_start = (datetime.strptime(digest_date, "%Y-%m-%d") - timedelta(days=days_back)).strftime("%B %d")
     week_end = datetime.strptime(digest_date, "%Y-%m-%d").strftime("%B %d, %Y")
 
     parts = []
 
     # --- Intro ---
-    parts.append(f"Hey Yan. Welcome to your weekly research digest, covering {week_start} through {week_end}.")
+    parts.append(f"Hey Yan. Welcome to your weekly research digest, {week_start} through {week_end}.")
     parts.append("")
 
-    # Count what we found
+    # Count themes
     project_counts: dict[str, int] = {}
     for p in scored:
         for m in p.get("project_matches", []):
             project_counts[m[0]] = project_counts.get(m[0], 0) + 1
     hot = sorted(project_counts.items(), key=lambda x: x[1], reverse=True)[:3]
 
-    parts.append(f"I scanned the latest publications and found {len(scored)} papers relevant to your work.")
+    parts.append(f"I found {len(scored)} papers from top venues this week.")
     if hot:
-        hot_names = ", ".join(_proj_friendly(p) for p, _ in hot[:2])
-        parts.append(f"The biggest clusters this week are around {hot_names}.")
+        hot_names = " and ".join(_proj_friendly(p) for p, _ in hot[:2])
+        parts.append(f"Most activity around {hot_names}.")
     parts.append("")
-    parts.append("Let me walk you through the highlights.")
+    parts.append("I'll do deep dives on the top five, then quick hits on a few more.")
     parts.append("")
 
     # --- Deep dive: top 5 papers ---
@@ -600,89 +749,124 @@ def digest_to_speech_text(scored: list[dict], repos: list[dict],
         overall = p.get("rating_overall", 0)
         matches = p.get("project_matches", [])
         proj = _proj_friendly(matches[0][0]) if matches else "your research"
-        summary = _summarize_for_speech(p.get("summary", ""))
+        summary = p.get("summary", "")
+        paper_type = _classify_paper(summary)
+        contribution = _extract_contribution(summary, paper_type)
         rating_desc = _rating_word(overall)
 
         parts.append(_transition(i))
         parts.append("")
 
-        # Title — conversational
-        if venue and venue != "arXiv" and venue != "arxiv.org":
-            parts.append(f"A paper in {venue} titled: {title}.")
+        # Venue + title
+        if venue and venue.lower() not in ("arxiv", "arxiv.org"):
+            parts.append(f"From {venue}: {title}.")
         else:
-            parts.append(f"A new preprint titled: {title}.")
+            parts.append(f"New preprint: {title}.")
         parts.append("")
 
-        # What they found — the key content
-        if summary:
-            parts.append(f"Here's what they found. {summary}")
+        # Paper type
+        parts.append(_paper_type_label(paper_type))
+
+        # Type-specific analysis
+        if paper_type == "empirical":
+            if contribution:
+                parts.append(f"The key finding: {contribution}")
+            parts.append("")
+            # Try to find identification strategy
+            id_sentence = ""
+            for s in re.split(r'(?<=[.!?])\s+', summary):
+                sl = s.lower()
+                if any(w in sl for w in ["using", "exploit", "leverage",
+                                          "instrument", "randomiz", "quasi-experiment",
+                                          "natural experiment", "difference", "panel"]):
+                    id_sentence = s
+                    break
+            if id_sentence and id_sentence != contribution:
+                parts.append(f"Their identification approach: {id_sentence}")
+                parts.append("")
+        elif paper_type == "method":
+            if contribution:
+                parts.append(f"The method contribution: {contribution}")
+            parts.append("")
+            # Try to find performance claim
+            for s in re.split(r'(?<=[.!?])\s+', summary):
+                sl = s.lower()
+                if any(w in sl for w in ["outperform", "state-of-the-art", "improve",
+                                          "achieve", "benchmark", "surpass"]):
+                    parts.append(f"Performance: {s}")
+                    parts.append("")
+                    break
+        elif paper_type == "theory":
+            if contribution:
+                parts.append(f"The main result: {contribution}")
             parts.append("")
 
-        # Why you care — the connection
-        parts.append(f"Why this matters to you: this connects to {proj}.")
+        # Connection to your work
+        parts.append(f"Why it matters for you: connects to {proj}.")
         if len(matches) > 1:
-            other = _proj_friendly(matches[1][0])
-            parts.append(f"It's also relevant to {other}.")
-
-        # Rating — brief
-        parts.append(f"I'd rate this one {rating_desc}, {overall} out of 5 overall.")
+            parts.append(f"Also touches {_proj_friendly(matches[1][0])}.")
         parts.append("")
 
-    # --- Quick hits: next 5-8 papers ---
-    quick = scored[5:12]
+        # Rating
+        parts.append(f"Rating: {rating_desc}, {overall} out of 5.")
+        parts.append("")
+
+    # --- Quick hits ---
+    quick = scored[5:10]
     if quick:
-        parts.append("Now, a few quick hits. These are worth knowing about but I'll keep them brief.")
+        parts.append("Quick hits section. Five more papers, brief take on each.")
         parts.append("")
 
         for p in quick:
             title = p["title"]
+            venue = p.get("venue", "") or p.get("source", "")
             matches = p.get("project_matches", [])
             proj = _proj_friendly(matches[0][0]) if matches else "your work"
             overall = p.get("rating_overall", 0)
-            summary = _summarize_for_speech(p.get("summary", ""))
+            summary = p.get("summary", "")
+            paper_type = _classify_paper(summary)
+            contribution = _extract_contribution(summary, paper_type)
 
-            parts.append(f"{title}.")
-            if summary:
-                # Just one sentence for quick hits
-                one_sentence = re.split(r'(?<=[.!?])\s+', summary)[0]
-                parts.append(one_sentence)
-            parts.append(f"Relevant to {proj}. Rated {overall} out of 5.")
+            venue_tag = f"In {venue}. " if venue and venue.lower() not in ("arxiv", "arxiv.org") else ""
+            type_tag = {"empirical": "Empirical.", "method": "Methods.", "theory": "Theory."}.get(paper_type, "")
+
+            parts.append(f"{title}. {venue_tag}{type_tag}")
+            if contribution:
+                # Just the core claim
+                parts.append(contribution[:200])
+            parts.append(f"Connects to {proj}. {_rating_word(overall)}, {overall} out of 5.")
             parts.append("")
 
-    # How many more in written version
-    remaining = len(scored) - 12
+    remaining = len(scored) - 10
     if remaining > 0:
-        parts.append(f"There are {remaining} more papers in the written digest if you want to go deeper.")
+        parts.append(f"{remaining} more papers in the written digest.")
         parts.append("")
 
     # --- GitHub repos ---
     if repos:
-        parts.append("Switching gears to GitHub.")
+        parts.append("GitHub repos this week.")
         parts.append("")
-        top_repos = repos[:3]
-        for r in top_repos:
+        for r in repos[:3]:
             name = r["name"].split("/")[-1].replace("-", " ")
-            desc = r["description"][:120] if r["description"] else ""
-            parts.append(f"{name}, with {r['stars']:,} stars. {desc}")
+            desc = r["description"][:100] if r["description"] else ""
+            parts.append(f"{name}. {r['stars']:,} stars. {desc}")
         parts.append("")
 
-    # --- Closing synthesis ---
-    parts.append("So, stepping back, what's the big picture this week?")
+    # --- Closing ---
+    parts.append("Big picture for the week.")
     parts.append("")
     if hot:
-        if len(hot) >= 2:
+        names = [_proj_friendly(p) for p, c in hot[:2]]
+        counts = [str(c) for _, c in hot[:2]]
+        if len(names) >= 2:
             parts.append(
-                f"The field is moving on two fronts that matter for you. "
-                f"First, {_proj_friendly(hot[0][0])}, where {hot[0][1]} papers appeared this week. "
-                f"And second, {_proj_friendly(hot[1][0])}, with {hot[1][1]} papers."
+                f"Two active fronts: {names[0]} with {counts[0]} papers, "
+                f"and {names[1]} with {counts[1]} papers."
             )
         else:
-            parts.append(
-                f"Most of the action this week is around {_proj_friendly(hot[0][0])}, "
-                f"with {hot[0][1]} papers touching that area."
-            )
+            parts.append(f"Main activity: {names[0]} with {counts[0]} papers.")
     parts.append("")
-    parts.append("Check the written digest for links, ratings, and full summaries. That's all for this week. Talk to you next Sunday.")
+    parts.append("Full details and links in the written digest. See you next Sunday.")
 
     return "\n".join(parts)
 
@@ -777,14 +961,19 @@ def main():
         repos = search_github_repos(CFG["github_topics"], days_back=args.days)
         print(f"  Found {len(repos)} repos")
 
-    # --- Score papers for shared use by digest + audio ---
+    # --- Score papers + apply quality gate ---
     scored = []
+    rejected = 0
     for p in all_papers:
         matches = score_paper(p)
         if matches:
             p["project_matches"] = matches
             p["top_score"] = matches[0][1]
             rate_paper(p)
+            # Quality gate: arXiv papers need high relevance or citations
+            if p["source"] == "arXiv" and not _is_high_quality_arxiv(p):
+                rejected += 1
+                continue
             scored.append(p)
     # Deduplicate
     seen_titles: set[str] = set()
@@ -795,6 +984,8 @@ def main():
             seen_titles.add(title_key)
             unique_scored.append(p)
     unique_scored.sort(key=lambda x: x["rating_overall"], reverse=True)
+    if rejected:
+        print(f"  Quality gate: filtered out {rejected} low-quality arXiv papers")
 
     # --- Generate digest ---
     digest = generate_digest(all_papers, repos, args.date, args.days)
