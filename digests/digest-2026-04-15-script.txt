@@ -1,83 +1,92 @@
 Hey Yan. Welcome to your weekly research digest, covering April 08 through April 15, 2026.
 
-I found 38 papers relevant to your work this week.
+I scanned the latest publications and found 38 papers relevant to your work.
+The biggest clusters this week are around your Net DPO paper for Management Science, your visible context thresholds paper for Nature Machine Intelligence.
+
 Let me walk you through the highlights.
 
 Let's start with something interesting.
 
-A paper titled: Benchmarking Prompt Sensitivity in Large Language Models.
+A paper in European Conference on Information Retrieval titled: Benchmarking Prompt Sensitivity in Large Language Models.
 
 Here's what they found. Large language Models (LLMs) are highly sensitive to variations in prompt formulation, which can significantly impact their ability to generate accurate responses. In this paper, we introduce a new task, Prompt Sensitivity Prediction, and a dataset PromptSET designed to investigate the effects of slight prompt variations on LLM performance.
 
-Why this matters: this connects to LLM Prompt Variations.
-I'd rate this one solid, 3.0 out of 5.
+Why this matters to you: this connects to your prompt variations paper for Management Science.
+I'd rate this one solid, 3.0 out of 5 overall.
 
 Next up.
 
-A paper titled: Radio Astronomy in the Era of Vision-Language Models: Prompt Sensitivity and Adaptation.
-
-Here's what they found. Vision-Language Models (VLMs), such as recent Qwen and Gemini models, are positioned as general-purpose AI systems capable of reasoning across domains. Yet their capabilities in scientific imaging, especially on unfamiliar and potentially previously unseen data distributions, remain poorly understood.
-
-Why this matters: this connects to Visual Evidence Response.
-I'd rate this one moderate, 2.8 out of 5.
-
-Here's another one worth noting.
-
-A paper titled: SceneCritic: A Symbolic Evaluator for 3D Indoor Scene Synthesis.
+A new preprint titled: SceneCritic: A Symbolic Evaluator for 3D Indoor Scene Synthesis.
 
 Here's what they found. Large Language Models (LLMs) and Vision-Language Models (VLMs) increasingly generate indoor scenes through intermediate structures such as layouts and scene graphs, yet evaluation still relies on LLM or VLM judges that score rendered views, making judgments sensitive to viewpoint, prompt phrasing, and hallucination.
 
-Why this matters: this connects to Visual Evidence Response.
-I'd rate this one moderate, 2.8 out of 5.
+Why this matters to you: this connects to your visual evidence response paper for Nature Machine Intelligence.
+I'd rate this one moderate, 2.8 out of 5 overall.
 
-This next one is quite relevant.
+Here's another one worth noting.
 
-A paper titled: Visual Preference Optimization with Rubric Rewards.
+A new preprint titled: Visual Preference Optimization with Rubric Rewards.
 
 Here's what they found. The effectiveness of Direct Preference Optimization (DPO) depends on preference data that reflect the quality differences that matter in multimodal tasks. Existing pipelines often rely on off-policy perturbations or coarse outcome-based signals, which are not well suited to fine-grained visual reasoning.
 
-Why this matters: this connects to Net DPO.
-I'd rate this one moderate, 2.8 out of 5.
+Why this matters to you: this connects to your Net DPO paper for Management Science.
+It's also relevant to your visual evidence response paper for Nature Machine Intelligence.
+I'd rate this one moderate, 2.8 out of 5 overall.
+
+This next one is quite relevant.
+
+A paper in arXiv.org titled: Radio Astronomy in the Era of Vision-Language Models: Prompt Sensitivity and Adaptation.
+
+Here's what they found. Vision-Language Models (VLMs), such as recent Qwen and Gemini models, are positioned as general-purpose AI systems capable of reasoning across domains. Yet their capabilities in scientific imaging, especially on unfamiliar and potentially previously unseen data distributions, remain poorly understood.
+
+Why this matters to you: this connects to your visual evidence response paper for Nature Machine Intelligence.
+It's also relevant to your prompt variations paper for Management Science.
+I'd rate this one moderate, 2.8 out of 5 overall.
 
 Moving on.
 
-A paper titled: The PIMMUR Principles: Ensuring Validity in Collective Behavior of LLM Societies.
+A paper in arXiv.org titled: The PIMMUR Principles: Ensuring Validity in Collective Behavior of LLM Societies.
 
 Here's what they found. Large language models (LLMs) are increasingly deployed to simulate human collective behaviors, yet the methodological rigor of these"AI societies"remains under-explored. Through a systematic audit of 39 recent studies, we identify six pervasive flaws-spanning agent profiles, interaction, memory, control, unawareness, and realism (PIMMUR).
 
-Why this matters: this connects to Visible Context Thresholds.
-I'd rate this one moderate, 2.7 out of 5.
+Why this matters to you: this connects to your visible context thresholds paper for Nature Machine Intelligence.
+It's also relevant to your pricing bias paper.
+I'd rate this one moderate, 2.7 out of 5 overall.
 
-Now, a few quick hits.
+Now, a few quick hits. These are worth knowing about but I'll keep them brief.
 
 Understanding collective behavior in biological systems through potential field mechanisms.
 Collective behavior in biological systems emerges from local interactions among individuals, enabling groups to adapt to dynamic environments.
-Relevant to Inf Steering. Rated 2.6 out of 5.
+Relevant to your influence steering paper for ICML. Rated 2.6 out of 5.
 
 A Human-AI Comparative Analysis of Prompt Sensitivity in LLM-Based Relevance Judgment.
 Large Language Models (LLMs) are increasingly used to automate relevance judgments for information retrieval (IR) tasks, often demonstrating agreement with human labels that approaches inter-human agreement.
-Relevant to LLM Prompt Variations. Rated 2.6 out of 5.
-
-Collective behavior of higher-order globally coupled oscillatory networks in response to positive and negative couplings.
-Collective behavior is among the most fascinating complex dynamics in coupled networks with applications in various fields.
-Relevant to Net DPO. Rated 2.4 out of 5.
-
-Emergent misalignment as prompt sensitivity: A research note.
-Betley et al.
-Relevant to Net DPO. Rated 2.4 out of 5.
+Relevant to your prompt variations paper for Management Science. Rated 2.6 out of 5.
 
 Parallax: Why AI Agents That Think Must Never Act.
 Autonomous AI agents are rapidly transitioning from experimental tools to operational infrastructure, with projections that 80% of enterprise applications will embed AI copilots by the end of 2026.
-Relevant to Net DPO. Rated 2.4 out of 5.
+Relevant to your Net DPO paper for Management Science. Rated 2.4 out of 5.
 
 Cycle-Consistent Search: Question Reconstructability as a Proxy Reward for Search Agent Training.
 Reinforcement Learning (RL) has shown strong potential for optimizing search agents in complex information retrieval tasks.
-Relevant to Net DPO. Rated 2.4 out of 5.
+Relevant to your Net DPO paper for Management Science. Rated 2.4 out of 5.
 
 The Verification Tax: Fundamental Limits of AI Auditing in the Rare-Error Regime.
 The most cited calibration result in deep learning -- post-temperature-scaling ECE of 0.012 on CIFAR-100 (Guo et al., 2017) -- is below the statistical noise floor.
-Relevant to LLMMeasurements. Rated 2.4 out of 5.
+Relevant to your LLM measurements paper. Rated 2.4 out of 5.
 
-There are 26 more papers in the written digest.
+From edges to meaning: Semantic line sketches as a cognitive scaffold for ancient pictograph invention.
+Humans readily recognize objects from sparse line drawings, a capacity that appears early in development and persists across cultures, suggesting neural rather than purely learned origins.
+Relevant to your causal abstraction paper for NeurIPS. Rated 2.4 out of 5.
 
-Check the written digest for links and full details. That's all for this week. Talk to you next Sunday.
+RePAIR: Interactive Machine Unlearning through Prompt-Aware Model Repair.
+Large language models (LLMs) inherently absorb harmful knowledge, misinformation, and personal data during pretraining on large-scale web corpora, with no native mechanism for selective removal.
+Relevant to your cooperation on networks paper. Rated 2.4 out of 5.
+
+There are 26 more papers in the written digest if you want to go deeper.
+
+So, stepping back, what's the big picture this week?
+
+The field is moving on two fronts that matter for you. First, your Net DPO paper for Management Science, where 11 papers appeared this week. And second, your visible context thresholds paper for Nature Machine Intelligence, with 10 papers.
+
+Check the written digest for links, ratings, and full summaries. That's all for this week. Talk to you next Sunday.
